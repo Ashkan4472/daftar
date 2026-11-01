@@ -99,6 +99,15 @@ void main() {
     expect(splitShares(0, SplitMode.equal, [0]), isNull);
   });
 
+  test('category split math', () {
+    expect(splitParts(100001, SplitMode.equal, [0, 0, 0]), [33335, 33333, 33333]);
+    expect(splitParts(100000, SplitMode.percent, [33, 67]), [33000, 67000]);
+    expect(splitParts(100000, SplitMode.percent, [50, 40]), isNull); // must reach 100
+    expect(splitParts(100000, SplitMode.exact, [60000, 40000]), [60000, 40000]);
+    expect(splitParts(100000, SplitMode.exact, [60000, 30000]), isNull); // must add up
+    expect(splitParts(100000, SplitMode.exact, [100000]), isNull); // one part is not a split
+  });
+
   test('transfer pairing', () {
     final t = DateTime(2026, 10, 1, 12);
     final pairs = findTransferPairs([
