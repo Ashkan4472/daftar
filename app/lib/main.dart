@@ -108,7 +108,19 @@ class _ShellState extends ConsumerState<Shell> with WidgetsBindingObserver {
     await syncReminders(db);
     await _sync();
     final launch = await launchPayload();
-    if (mounted && launch != null) routePayload(context, ref, launch);
+    if (launch != null) _open(launch);
+  }
+
+  /// Opens a notification target, but only once the lock screen is gone (routes would sit above it).
+  void _open(String payload) {
+    if (!mounted) return;
+    if (!appLocked.value) return routePayload(context, ref, payload);
+    void wait() {
+      if (appLocked.value) return;
+      appLocked.removeListener(wait);
+      if (mounted) routePayload(context, ref, payload);
+    }
+    appLocked.addListener(wait);
   }
 
   Future<void> _sync() async {
@@ -125,7 +137,7 @@ class _ShellState extends ConsumerState<Shell> with WidgetsBindingObserver {
 
   void _onTap() {
     final p = notificationTaps.value;
-    if (p != null && mounted) routePayload(context, ref, p);
+    if (p != null) _open(p);
   }
 
   @override

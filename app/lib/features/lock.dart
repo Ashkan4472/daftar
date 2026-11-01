@@ -126,6 +126,9 @@ class PinPadState extends ConsumerState<PinPad> with SingleTickerProviderStateMi
   }
 }
 
+/// True while the lock screen covers the app. Routes opened from notifications wait for it.
+final appLocked = ValueNotifier<bool>(true);
+
 /// Shows [child] and covers it with a PIN screen while locked.
 class LockGate extends ConsumerStatefulWidget {
   const LockGate({super.key, required this.child});
@@ -144,6 +147,7 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
   String? _error;
   final _pad = GlobalKey<PinPadState>();
   bool _bioTried = false;
+  bool _bioBusy = false;
 
   @override
   void initState() {
@@ -163,6 +167,8 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) _leftAt = DateTime.now();
+    // The prompt is cancelled when the app pauses (e.g. while a notification launch settles); ask again once visible.
+    if (state == AppLifecycleState.resumed && _locked && _decided && _s['lock_bio'] == 'true') _bio();
     if (state == AppLifecycleState.resumed && _enabled && _leftAt != null) {
       final secs = int.tryParse(_s['lock_timeout'] ?? '') ?? 60;
       if (DateTime.now().difference(_leftAt!).inSeconds >= secs && !_locked) {
@@ -176,8 +182,14 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
   }
 
   Future<void> _bio() async {
+    if (_bioBusy) return;
+    _bioBusy = true;
     final l = AppLocalizations.of(context);
-    if (await biometricUnlock(l.lockBioReason) && mounted) setState(() => _locked = false);
+    try {
+      if (await biometricUnlock(l.lockBioReason) && mounted) setState(() => _locked = false);
+    } finally {
+      _bioBusy = false;
+    }
   }
 
   Future<void> _check(String pin) async {
@@ -217,6 +229,7 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
       _bioTried = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _bio());
     }
+    if (appLocked.value != show) WidgetsBinding.instance.addPostFrameCallback((_) => appLocked.value = show);
     final blocked = _blockedUntil != null && DateTime.now().isBefore(_blockedUntil!);
     return Stack(children: [
       ExcludeSemantics(excluding: show, child: widget.child),
