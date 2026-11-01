@@ -8180,6 +8180,316 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   }
 }
 
+class $TxPartsTable extends TxParts with TableInfo<$TxPartsTable, TxPart> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TxPartsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _transactionIdMeta = const VerificationMeta(
+    'transactionId',
+  );
+  @override
+  late final GeneratedColumn<int> transactionId = GeneratedColumn<int>(
+    'transaction_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES transactions (id)',
+    ),
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<int> categoryId = GeneratedColumn<int>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, transactionId, categoryId, amount];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tx_parts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TxPart> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('transaction_id')) {
+      context.handle(
+        _transactionIdMeta,
+        transactionId.isAcceptableOrUnknown(
+          data['transaction_id']!,
+          _transactionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_transactionIdMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TxPart map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TxPart(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      transactionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}transaction_id'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}category_id'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+    );
+  }
+
+  @override
+  $TxPartsTable createAlias(String alias) {
+    return $TxPartsTable(attachedDatabase, alias);
+  }
+}
+
+class TxPart extends DataClass implements Insertable<TxPart> {
+  final int id;
+  final int transactionId;
+  final int categoryId;
+  final int amount;
+  const TxPart({
+    required this.id,
+    required this.transactionId,
+    required this.categoryId,
+    required this.amount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['transaction_id'] = Variable<int>(transactionId);
+    map['category_id'] = Variable<int>(categoryId);
+    map['amount'] = Variable<int>(amount);
+    return map;
+  }
+
+  TxPartsCompanion toCompanion(bool nullToAbsent) {
+    return TxPartsCompanion(
+      id: Value(id),
+      transactionId: Value(transactionId),
+      categoryId: Value(categoryId),
+      amount: Value(amount),
+    );
+  }
+
+  factory TxPart.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TxPart(
+      id: serializer.fromJson<int>(json['id']),
+      transactionId: serializer.fromJson<int>(json['transactionId']),
+      categoryId: serializer.fromJson<int>(json['categoryId']),
+      amount: serializer.fromJson<int>(json['amount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'transactionId': serializer.toJson<int>(transactionId),
+      'categoryId': serializer.toJson<int>(categoryId),
+      'amount': serializer.toJson<int>(amount),
+    };
+  }
+
+  TxPart copyWith({
+    int? id,
+    int? transactionId,
+    int? categoryId,
+    int? amount,
+  }) => TxPart(
+    id: id ?? this.id,
+    transactionId: transactionId ?? this.transactionId,
+    categoryId: categoryId ?? this.categoryId,
+    amount: amount ?? this.amount,
+  );
+  TxPart copyWithCompanion(TxPartsCompanion data) {
+    return TxPart(
+      id: data.id.present ? data.id.value : this.id,
+      transactionId: data.transactionId.present
+          ? data.transactionId.value
+          : this.transactionId,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TxPart(')
+          ..write('id: $id, ')
+          ..write('transactionId: $transactionId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, transactionId, categoryId, amount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TxPart &&
+          other.id == this.id &&
+          other.transactionId == this.transactionId &&
+          other.categoryId == this.categoryId &&
+          other.amount == this.amount);
+}
+
+class TxPartsCompanion extends UpdateCompanion<TxPart> {
+  final Value<int> id;
+  final Value<int> transactionId;
+  final Value<int> categoryId;
+  final Value<int> amount;
+  const TxPartsCompanion({
+    this.id = const Value.absent(),
+    this.transactionId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.amount = const Value.absent(),
+  });
+  TxPartsCompanion.insert({
+    this.id = const Value.absent(),
+    required int transactionId,
+    required int categoryId,
+    required int amount,
+  }) : transactionId = Value(transactionId),
+       categoryId = Value(categoryId),
+       amount = Value(amount);
+  static Insertable<TxPart> custom({
+    Expression<int>? id,
+    Expression<int>? transactionId,
+    Expression<int>? categoryId,
+    Expression<int>? amount,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (transactionId != null) 'transaction_id': transactionId,
+      if (categoryId != null) 'category_id': categoryId,
+      if (amount != null) 'amount': amount,
+    });
+  }
+
+  TxPartsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? transactionId,
+    Value<int>? categoryId,
+    Value<int>? amount,
+  }) {
+    return TxPartsCompanion(
+      id: id ?? this.id,
+      transactionId: transactionId ?? this.transactionId,
+      categoryId: categoryId ?? this.categoryId,
+      amount: amount ?? this.amount,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (transactionId.present) {
+      map['transaction_id'] = Variable<int>(transactionId.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<int>(categoryId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TxPartsCompanion(')
+          ..write('id: $id, ')
+          ..write('transactionId: $transactionId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDb extends GeneratedDatabase {
   _$AppDb(QueryExecutor e) : super(e);
   $AppDbManager get managers => $AppDbManager(this);
@@ -8204,6 +8514,7 @@ abstract class _$AppDb extends GeneratedDatabase {
   late final $TransferProposalsTable transferProposals =
       $TransferProposalsTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $TxPartsTable txParts = $TxPartsTable(this);
   late final Index rawSmsStatus = Index(
     'raw_sms_status',
     'CREATE INDEX raw_sms_status ON raw_sms (status)',
@@ -8232,6 +8543,10 @@ abstract class _$AppDb extends GeneratedDatabase {
     'split_person',
     'CREATE INDEX split_person ON splits (person_id)',
   );
+  late final Index partTx = Index(
+    'part_tx',
+    'CREATE INDEX part_tx ON tx_parts (transaction_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8255,6 +8570,7 @@ abstract class _$AppDb extends GeneratedDatabase {
     inboxItems,
     transferProposals,
     settings,
+    txParts,
     rawSmsStatus,
     txTime,
     txAccountTime,
@@ -8262,6 +8578,7 @@ abstract class _$AppDb extends GeneratedDatabase {
     txCategory,
     txDeleted,
     splitPerson,
+    partTx,
   ];
 }
 
@@ -10514,6 +10831,25 @@ final class $$CategoriesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$TxPartsTable, List<TxPart>> _txPartsRefsTable(
+    _$AppDb db,
+  ) => MultiTypedResultKey.fromTable(
+    db.txParts,
+    aliasName: 'categories__id__tx_parts__category_id',
+  );
+
+  $$TxPartsTableProcessedTableManager get txPartsRefs {
+    final manager = $$TxPartsTableTableManager(
+      $_db,
+      $_db.txParts,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_txPartsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CategoriesTableFilterComposer
@@ -10660,6 +10996,31 @@ class $$CategoriesTableFilterComposer
           }) => $$RecurringsTableFilterComposer(
             $db: $db,
             $table: $db.recurrings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> txPartsRefs(
+    Expression<bool> Function($$TxPartsTableFilterComposer f) f,
+  ) {
+    final $$TxPartsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.txParts,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TxPartsTableFilterComposer(
+            $db: $db,
+            $table: $db.txParts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -10881,6 +11242,31 @@ class $$CategoriesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> txPartsRefs<T extends Object>(
+    Expression<T> Function($$TxPartsTableAnnotationComposer a) f,
+  ) {
+    final $$TxPartsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.txParts,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TxPartsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.txParts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -10901,6 +11287,7 @@ class $$CategoriesTableTableManager
             bool transactionsRefs,
             bool budgetsRefs,
             bool recurringsRefs,
+            bool txPartsRefs,
           })
         > {
   $$CategoriesTableTableManager(_$AppDb db, $CategoriesTable table)
@@ -10976,6 +11363,7 @@ class $$CategoriesTableTableManager
                 transactionsRefs = false,
                 budgetsRefs = false,
                 recurringsRefs = false,
+                txPartsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -10983,6 +11371,7 @@ class $$CategoriesTableTableManager
                     if (transactionsRefs) db.transactions,
                     if (budgetsRefs) db.budgets,
                     if (recurringsRefs) db.recurrings,
+                    if (txPartsRefs) db.txParts,
                   ],
                   addJoins:
                       <
@@ -11076,6 +11465,26 @@ class $$CategoriesTableTableManager
                           referencedColumn: 'category_id',
                           typedResults: items,
                         ),
+                      if (txPartsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          Category,
+                          $CategoriesTable,
+                          TxPart,
+                          $TxPartsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._txPartsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).txPartsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'category_id',
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -11101,6 +11510,7 @@ typedef $$CategoriesTableProcessedTableManager =
         bool transactionsRefs,
         bool budgetsRefs,
         bool recurringsRefs,
+        bool txPartsRefs,
       })
     >;
 typedef $$TagsTableCreateCompanionBuilder = TagsCompanion Function({
@@ -11574,6 +11984,25 @@ final class $$TransactionsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$TxPartsTable, List<TxPart>> _txPartsRefsTable(
+    _$AppDb db,
+  ) => MultiTypedResultKey.fromTable(
+    db.txParts,
+    aliasName: 'transactions__id__tx_parts__transaction_id',
+  );
+
+  $$TxPartsTableProcessedTableManager get txPartsRefs {
+    final manager = $$TxPartsTableTableManager(
+      $_db,
+      $_db.txParts,
+    ).filter((f) => f.transactionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_txPartsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$TransactionsTableFilterComposer
@@ -11807,6 +12236,31 @@ class $$TransactionsTableFilterComposer
           }) => $$SettlementsTableFilterComposer(
             $db: $db,
             $table: $db.settlements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> txPartsRefs(
+    Expression<bool> Function($$TxPartsTableFilterComposer f) f,
+  ) {
+    final $$TxPartsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.txParts,
+      getReferencedColumn: (t) => t.transactionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TxPartsTableFilterComposer(
+            $db: $db,
+            $table: $db.txParts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -12196,6 +12650,31 @@ class $$TransactionsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> txPartsRefs<T extends Object>(
+    Expression<T> Function($$TxPartsTableAnnotationComposer a) f,
+  ) {
+    final $$TxPartsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.txParts,
+      getReferencedColumn: (t) => t.transactionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TxPartsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.txParts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TransactionsTableTableManager
@@ -12218,6 +12697,7 @@ class $$TransactionsTableTableManager
             bool transactionTagsRefs,
             bool splitsRefs,
             bool settlementsRefs,
+            bool txPartsRefs,
           })
         > {
   $$TransactionsTableTableManager(_$AppDb db, $TransactionsTable table)
@@ -12335,6 +12815,7 @@ class $$TransactionsTableTableManager
                 transactionTagsRefs = false,
                 splitsRefs = false,
                 settlementsRefs = false,
+                txPartsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -12342,6 +12823,7 @@ class $$TransactionsTableTableManager
                     if (transactionTagsRefs) db.transactionTags,
                     if (splitsRefs) db.splits,
                     if (settlementsRefs) db.settlements,
+                    if (txPartsRefs) db.txParts,
                   ],
                   addJoins:
                       <
@@ -12457,6 +12939,26 @@ class $$TransactionsTableTableManager
                           referencedColumn: 'transaction_id',
                           typedResults: items,
                         ),
+                      if (txPartsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          Transaction,
+                          $TransactionsTable,
+                          TxPart,
+                          $TxPartsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TransactionsTableReferences
+                              ._txPartsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TransactionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).txPartsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'transaction_id',
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -12484,6 +12986,7 @@ typedef $$TransactionsTableProcessedTableManager =
         bool transactionTagsRefs,
         bool splitsRefs,
         bool settlementsRefs,
+        bool txPartsRefs,
       })
     >;
 typedef $$TransactionTagsTableCreateCompanionBuilder =
@@ -15781,6 +16284,376 @@ typedef $$SettingsTableProcessedTableManager =
       Setting,
       PrefetchHooks Function()
     >;
+typedef $$TxPartsTableCreateCompanionBuilder = TxPartsCompanion Function({
+  Value<int> id,
+  required int transactionId,
+  required int categoryId,
+  required int amount,
+});
+typedef $$TxPartsTableUpdateCompanionBuilder = TxPartsCompanion Function({
+  Value<int> id,
+  Value<int> transactionId,
+  Value<int> categoryId,
+  Value<int> amount,
+});
+
+final class $$TxPartsTableReferences
+    extends BaseReferences<_$AppDb, $TxPartsTable, TxPart> {
+  $$TxPartsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $TransactionsTable _transactionIdTable(_$AppDb db) =>
+      db.transactions.createAlias('tx_parts__transaction_id__transactions__id');
+
+  $$TransactionsTableProcessedTableManager get transactionId {
+    final $_column = $_itemColumn<int>('transaction_id')!;
+
+    final manager = $$TransactionsTableTableManager(
+      $_db,
+      $_db.transactions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_transactionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CategoriesTable _categoryIdTable(_$AppDb db) =>
+      db.categories.createAlias('tx_parts__category_id__categories__id');
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<int>('category_id')!;
+
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$TxPartsTableFilterComposer extends Composer<_$AppDb, $TxPartsTable> {
+  $$TxPartsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$TransactionsTableFilterComposer get transactionId {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableFilterComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TxPartsTableOrderingComposer extends Composer<_$AppDb, $TxPartsTable> {
+  $$TxPartsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$TransactionsTableOrderingComposer get transactionId {
+    final $$TransactionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TxPartsTableAnnotationComposer
+    extends Composer<_$AppDb, $TxPartsTable> {
+  $$TxPartsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  $$TransactionsTableAnnotationComposer get transactionId {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TxPartsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDb,
+          $TxPartsTable,
+          TxPart,
+          $$TxPartsTableFilterComposer,
+          $$TxPartsTableOrderingComposer,
+          $$TxPartsTableAnnotationComposer,
+          $$TxPartsTableCreateCompanionBuilder,
+          $$TxPartsTableUpdateCompanionBuilder,
+          (TxPart, $$TxPartsTableReferences),
+          TxPart,
+          PrefetchHooks Function({bool transactionId, bool categoryId})
+        > {
+  $$TxPartsTableTableManager(_$AppDb db, $TxPartsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TxPartsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TxPartsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TxPartsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> transactionId = const Value.absent(),
+                Value<int> categoryId = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+              }) => TxPartsCompanion(
+                id: id,
+                transactionId: transactionId,
+                categoryId: categoryId,
+                amount: amount,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int transactionId,
+                required int categoryId,
+                required int amount,
+              }) => TxPartsCompanion.insert(
+                id: id,
+                transactionId: transactionId,
+                categoryId: categoryId,
+                amount: amount,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TxPartsTable, TxPart>(table),
+                  $$TxPartsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({transactionId = false, categoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (transactionId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.transactionId,
+                        referencedTable: $$TxPartsTableReferences
+                            ._transactionIdTable(db),
+                        referencedColumn: $$TxPartsTableReferences
+                            ._transactionIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (categoryId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.categoryId,
+                        referencedTable: $$TxPartsTableReferences
+                            ._categoryIdTable(db),
+                        referencedColumn: $$TxPartsTableReferences
+                            ._categoryIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$TxPartsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDb,
+      $TxPartsTable,
+      TxPart,
+      $$TxPartsTableFilterComposer,
+      $$TxPartsTableOrderingComposer,
+      $$TxPartsTableAnnotationComposer,
+      $$TxPartsTableCreateCompanionBuilder,
+      $$TxPartsTableUpdateCompanionBuilder,
+      (TxPart, $$TxPartsTableReferences),
+      TxPart,
+      PrefetchHooks Function({bool transactionId, bool categoryId})
+    >;
 
 class $AppDbManager {
   final _$AppDb _db;
@@ -15820,4 +16693,6 @@ class $AppDbManager {
       $$TransferProposalsTableTableManager(_db, _db.transferProposals);
   $$SettingsTableTableManager get settings =>
       $$SettingsTableTableManager(_db, _db.settings);
+  $$TxPartsTableTableManager get txParts =>
+      $$TxPartsTableTableManager(_db, _db.txParts);
 }

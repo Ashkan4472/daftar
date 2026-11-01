@@ -139,6 +139,15 @@ class TransactionTags extends Table {
   Set<Column> get primaryKey => {transactionId, tagId};
 }
 
+/// Category split of one transaction: parts are positive Rial and add up to its |amount|.
+/// Transactions.categoryId then holds the largest part's category.
+@TableIndex(name: 'part_tx', columns: {#transactionId})
+class TxParts extends Table with _Id {
+  IntColumn get transactionId => integer().references(Transactions, #id)();
+  IntColumn get categoryId => integer().references(Categories, #id)();
+  IntColumn get amount => integer()();
+}
+
 @DataClassName('Person')
 class People extends Table with _Id {
   TextColumn get name => text()();
@@ -228,13 +237,13 @@ class Settings extends Table {
 @DriftDatabase(tables: [
   Banks, Accounts, SmsSenders, SmsTemplates, RawSms, Categories, Tags,
   Transactions, TransactionTags, People, Splits, Settlements, Budgets,
-  Recurrings, Reminders, InboxItems, TransferProposals, Settings,
+  Recurrings, Reminders, InboxItems, TransferProposals, Settings, TxParts,
 ])
 class AppDb extends _$AppDb {
   AppDb([QueryExecutor? e]) : super(e ?? driftDatabase(name: 'daftar'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -244,6 +253,7 @@ class AppDb extends _$AppDb {
           await seedDefaults(this);
         },
         onUpgrade: (m, from, to) async {
+          if (from < 5) await m.createTable(txParts);
           if (from < 4) {
             await m.addColumn(accounts, accounts.balanceSet);
             await m.addColumn(accounts, accounts.balanceSetAt);

@@ -14,6 +14,7 @@ import '../theme/theme.dart';
 import '../ui/format.dart';
 import '../ui/pickers.dart';
 import '../ui/widgets.dart';
+import 'cat_split.dart';
 import 'tx_extras.dart';
 
 Future<void> showTxSheet(BuildContext context, int id) =>
@@ -147,6 +148,8 @@ class TxDetailSheet extends ConsumerWidget {
                     selected: tx.categoryId,
                     onChanged: (c) => repo.setCategory([id], c),
                   ),
+                  const SizedBox(height: 8),
+                  TxCatSplit(txId: id, amount: tx.amount),
                 ],
                 SectionHeader(l.tags),
                 TagSelector(
@@ -390,6 +393,7 @@ class _AddTxSheetState extends ConsumerState<AddTxSheet> {
   int? _toAccount;
   bool get _expense => _type == 0;
   int? _account, _category;
+  List<(int, int)>? _parts; // category split; null = single category
   DateTime _at = DateTime.now();
   final Set<int> _tags = {};
   String? _error;
@@ -400,8 +404,11 @@ class _AddTxSheetState extends ConsumerState<AddTxSheet> {
     super.initState();
     final id = widget.editId;
     if (id != null) {
-      ref.read(repoProvider).get(id).then((row) {
+      ref.read(repoProvider).get(id).then((row) async {
         if (row == null || !mounted) return;
+        final saved = await (ref.read(dbProvider).select(ref.read(dbProvider).txParts)..where((p) => p.transactionId.equals(id))).get();
+        if (!mounted) return;
+        if (saved.isNotEmpty) _parts = [for (final p in saved) (p.categoryId, p.amount)];
         final prefs = ref.read(prefsProvider);
         final units = row.tx.amount.abs() ~/ (prefs.toman ? 10 : 1);
         setState(() {
@@ -493,11 +500,15 @@ class _AddTxSheetState extends ConsumerState<AddTxSheet> {
       nav.pop();
       return;
     }
+    if (_parts != null && _parts!.fold<int>(0, (a, p) => a + p.$2) != rial.abs()) {
+      setState(() => _error = l.catSplitStale);
+      return;
+    }
     await repo.putSetting('last_account', '$account');
     if (widget.editId != null) {
       final id = widget.editId!;
       await repo.updateManual(id, amount: rial, at: _at);
-      await repo.setCategory([id], _category);
+      await (_parts != null ? repo.setParts(id, _parts!) : repo.setCategory([id], _category));
       await repo.setNote(id, _note.text.trim());
       final old = (await repo.get(id))!.tagIds.toSet();
       for (final t in old.difference(_tags)) {
@@ -517,6 +528,7 @@ class _AddTxSheetState extends ConsumerState<AddTxSheet> {
       note: _note.text.trim(),
       tagIds: _tags,
     );
+    if (_parts != null) await repo.setParts(id, _parts!);
     nav.pop();
     messenger.clearSnackBars();
     messenger.showSnackBar(
@@ -714,12 +726,22 @@ class _AddTxSheetState extends ConsumerState<AddTxSheet> {
                   ],
                   if (_type != 2) ...[
                     SectionHeader(l.category),
-                    CategoryPicker(
-                      kind: _expense
-                          ? CategoryKind.expense
-                          : CategoryKind.income,
-                      selected: _category,
-                      onChanged: (c) => setState(() => _category = c),
+                    if (_parts == null)
+                      CategoryPicker(
+                        kind: _expense
+                            ? CategoryKind.expense
+                            : CategoryKind.income,
+                        selected: _category,
+                        onChanged: (c) => setState(() => _category = c),
+                      ),
+                    CatSplitView(
+                      kind: _expense ? CategoryKind.expense : CategoryKind.income,
+                      total: (parseMoney(_amount.text) ?? 0) * (prefs.toman ? 10 : 1),
+                      parts: _parts ?? const [],
+                      onChanged: (r) => setState(() {
+                        _parts = r.length < 2 ? null : r;
+                        if (r.isNotEmpty) _category = r.reduce((a, b) => b.$2 > a.$2 ? b : a).$1;
+                      }),
                     ),
                     SectionHeader(l.tags),
                     TagSelector(

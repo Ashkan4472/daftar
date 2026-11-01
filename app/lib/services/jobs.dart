@@ -44,6 +44,7 @@ Future<void> confirmTransfer(AppDb db, TransferProposal p) async {
       kind: const Value(TxKind.transfer), categoryId: const Value(null), needsReview: const Value(false),
       transferGroupId: Value(p.id), updatedAt: Value(DateTime.now()));
     await (db.update(db.transactions)..where((t) => t.id.isIn([p.outTxId, p.inTxId]))).write(c);
+    await (db.delete(db.txParts)..where((x) => x.transactionId.isIn([p.outTxId, p.inTxId]))).go();
     await (db.update(db.transferProposals)..where((x) => x.id.equals(p.id))).write(const TransferProposalsCompanion(status: Value('confirmed')));
   });
 }
@@ -140,8 +141,8 @@ Future<void> monthlySummary(AppDb db) async {
   ''', variables: [Variable.withInt(prev)]).getSingle();
   if (t.read<int>('n') == 0) return;
   final top = await db.customSelect('''
-    SELECT COALESCE(c.parent_id, c.id) AS k, SUM(-($effSql)) AS total
-    FROM transactions JOIN categories c ON c.id = transactions.category_id
+    SELECT COALESCE(c.parent_id, c.id) AS k, SUM(-($catEff)) AS total
+    FROM transactions $partJoin JOIN categories c ON c.id = $catKey
     WHERE transactions.deleted_at IS NULL AND NOT transactions.excluded AND transactions.kind = 'expense' AND transactions.jalali_ym = ?
     GROUP BY k ORDER BY total DESC LIMIT 3
   ''', variables: [Variable.withInt(prev)]).get();

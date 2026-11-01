@@ -70,3 +70,9 @@ final txSplitsProvider = StreamProvider.family<List<(SplitRow, Person)>, int>((r
     ..where(db.splits.transactionId.equals(txId));
   return q.watch().map((rs) => [for (final r in rs) (r.readTable(db.splits), r.readTable(db.people))]);
 });
+
+/// Category split parts of a transaction (empty = not split).
+final txPartsProvider = StreamProvider.family<List<TxPart>, int>((ref, txId) {
+  final db = ref.watch(dbProvider);
+  return (db.select(db.txParts)..where((p) => p.transactionId.equals(txId))..orderBy([(p) => OrderingTerm.desc(p.amount)])).watch();
+});

@@ -1425,4 +1425,32 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get balanceNegative => 'موجودی منفی است (اضافه‌برداشت)';
+
+  @override
+  String get catSplit => 'تقسیم بین دسته‌ها';
+
+  @override
+  String get editCatSplit => 'ویرایش تقسیم دسته‌ها';
+
+  @override
+  String get removeCatSplit => 'حذف تقسیم دسته‌ها';
+
+  @override
+  String catSplitCount(int n) {
+    return 'تقسیم بین $n دسته';
+  }
+
+  @override
+  String get addPart => 'افزودن دسته';
+
+  @override
+  String get partsLeft => 'مانده برای تخصیص';
+
+  @override
+  String get catSplitInvalid =>
+      'حداقل دو دسته لازم است و جمع بخش‌ها باید برابر مبلغ کل باشد.';
+
+  @override
+  String get catSplitStale =>
+      'مبلغ تغییر کرد. تقسیم دسته‌ها را دوباره انجام دهید.';
 }

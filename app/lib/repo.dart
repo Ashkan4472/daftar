@@ -104,7 +104,11 @@ Expression<bool> _where(AppDb db, TxFilter f) {
   if (f.from != null) e &= t.occurredAt.isBiggerOrEqualValue(f.from!);
   if (f.to != null) e &= t.occurredAt.isSmallerThanValue(f.to!);
   if (f.kind != null) e &= t.kind.equals(f.kind!.name);
-  if (f.categoryIds != null) e &= t.categoryId.isIn(f.categoryIds!);
+  if (f.categoryIds != null) {
+    e &= t.categoryId.isIn(f.categoryIds!) |
+        CustomExpression<bool>('EXISTS (SELECT 1 FROM tx_parts p WHERE p.transaction_id = transactions.id '
+            'AND p.category_id IN (${f.categoryIds!.join(',')}))');
+  }
   if (f.accountId != null) e &= t.accountId.equals(f.accountId!);
   if (f.marked) e &= t.marked.equals(true);
   if (f.uncategorized) e &= t.categoryId.isNull() & t.kind.equals(TxKind.transfer.name).not();
@@ -180,8 +184,25 @@ class Repo {
       (db.update(db.transactions)..where((t) => t.id.isIn(ids)))
           .write(c.copyWith(updatedAt: Value(DateTime.now())));
 
-  Future<void> setCategory(List<int> ids, int? categoryId) =>
-      _update(ids, TransactionsCompanion(categoryId: Value(categoryId), needsReview: const Value(false)));
+  /// Picking a single category undoes any category split.
+  Future<void> setCategory(List<int> ids, int? categoryId) => db.transaction(() async {
+        await (db.delete(db.txParts)..where((p) => p.transactionId.isIn(ids))).go();
+        await _update(ids, TransactionsCompanion(categoryId: Value(categoryId), needsReview: const Value(false)));
+      });
+
+  /// Splits one transaction across categories ([parts]: category id, positive Rial).
+  /// Fewer than two parts just sets a plain category.
+  Future<void> setParts(int id, List<(int, int)> parts) {
+    if (parts.length < 2) return setCategory([id], parts.firstOrNull?.$1);
+    return db.transaction(() async {
+      await (db.delete(db.txParts)..where((p) => p.transactionId.equals(id))).go();
+      for (final (cat, amount) in parts) {
+        await db.into(db.txParts).insert(TxPartsCompanion.insert(transactionId: id, categoryId: cat, amount: amount));
+      }
+      final top = parts.reduce((a, b) => b.$2 > a.$2 ? b : a);
+      await _update([id], TransactionsCompanion(categoryId: Value(top.$1), needsReview: const Value(false)));
+    });
+  }
 
   Future<void> setNote(int id, String note) => _update([id], TransactionsCompanion(note: Value(note)));
 
@@ -235,15 +256,21 @@ class Repo {
   }
 
   /// Manual transactions can change amount/date; SMS ones are facts.
-  Future<void> updateManual(int id, {required int amount, required DateTime at}) => _update(
-        [id],
-        TransactionsCompanion(
-          amount: Value(amount),
-          occurredAt: Value(at),
-          jalaliYm: Value(jalaliYm(at)),
-          kind: Value(amount < 0 ? TxKind.expense : TxKind.income),
-        ),
-      );
+  Future<void> updateManual(int id, {required int amount, required DateTime at}) => db.transaction(() async {
+        // A category split no longer adds up once the amount changes.
+        await db.customStatement(
+            'DELETE FROM tx_parts WHERE transaction_id = ?1 AND (SELECT SUM(amount) FROM tx_parts WHERE transaction_id = ?1) != ?2',
+            [id, amount.abs()]);
+        await _update(
+          [id],
+          TransactionsCompanion(
+            amount: Value(amount),
+            occurredAt: Value(at),
+            jalaliYm: Value(jalaliYm(at)),
+            kind: Value(amount < 0 ? TxKind.expense : TxKind.income),
+          ),
+        );
+      });
 
   Future<int> trashCount() async {
     final c = db.transactions.id.count();
@@ -260,6 +287,7 @@ class Repo {
     if (ids.isEmpty) return;
     await (db.delete(db.transactionTags)..where((t) => t.transactionId.isIn(ids))).go();
     await (db.delete(db.splits)..where((t) => t.transactionId.isIn(ids))).go();
+    await (db.delete(db.txParts)..where((t) => t.transactionId.isIn(ids))).go();
     await (db.delete(db.transactions)..where((t) => t.id.isIn(ids))).go();
   }
 
@@ -303,6 +331,7 @@ class Repo {
   Future<void> mergeCategory(int from, int into) => db.transaction(() async {
         await (db.update(db.transactions)..where((t) => t.categoryId.equals(from)))
             .write(TransactionsCompanion(categoryId: Value(into), updatedAt: Value(DateTime.now())));
+        await (db.update(db.txParts)..where((p) => p.categoryId.equals(from))).write(TxPartsCompanion(categoryId: Value(into)));
         await (db.update(db.categories)..where((c) => c.parentId.equals(from)))
             .write(CategoriesCompanion(parentId: Value(into)));
         await archiveCategory(from, true);

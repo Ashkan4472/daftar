@@ -465,3 +465,13 @@ S.update({
 S.update({
   'balanceNegative': ('Balance is negative (overdraft)', 'موجودی منفی است (اضافه‌برداشت)'),
 })
+S.update({
+  'catSplit': ('Split by category', 'تقسیم بین دسته‌ها'),
+  'editCatSplit': ('Edit category split', 'ویرایش تقسیم دسته‌ها'),
+  'removeCatSplit': ('Remove category split', 'حذف تقسیم دسته‌ها'),
+  'catSplitCount': ('Split into {n} categories', 'تقسیم بین {n} دسته', {'n': 'int'}),
+  'addPart': ('Add category', 'افزودن دسته'),
+  'partsLeft': ('Left to assign', 'مانده برای تخصیص'),
+  'catSplitInvalid': ('Need at least two categories, and the parts must add up to the total.', 'حداقل دو دسته لازم است و جمع بخش‌ها باید برابر مبلغ کل باشد.'),
+  'catSplitStale': ('The amount changed. Redo the category split.', 'مبلغ تغییر کرد. تقسیم دسته‌ها را دوباره انجام دهید.'),
+})

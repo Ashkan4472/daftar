@@ -10,6 +10,11 @@ import '../state.dart';
 /// My share of a transaction: the amount minus what people owe me for it.
 const effSql = 'transactions.amount + COALESCE((SELECT SUM(share) FROM splits s WHERE s.transaction_id = transactions.id), 0)';
 
+/// Category splits: a split transaction counts once per part, scaled to my share.
+const partJoin = 'LEFT JOIN tx_parts p ON p.transaction_id = transactions.id';
+const catKey = 'COALESCE(p.category_id, transactions.category_id)';
+const catEff = 'CASE WHEN p.id IS NULL THEN ($effSql) ELSE CAST(ROUND(($effSql) * 1.0 * p.amount / ABS(transactions.amount)) AS INTEGER) END';
+
 /// A report period: one Jalali month, or an arbitrary [from, to) range.
 class Period {
   const Period.month(int this.ym)
@@ -68,16 +73,16 @@ final slicesProvider = StreamProvider.family<List<Slice>, SliceKey>((ref, k) {
   final kind = expense ? 'expense' : 'income';
   final sign = expense ? -1 : 1;
   final (join, key) = switch (g) {
-    GroupBy.category => ('LEFT JOIN categories c ON c.id = transactions.category_id', 'COALESCE(c.parent_id, c.id)'),
+    GroupBy.category => ('$partJoin LEFT JOIN categories c ON c.id = $catKey', 'COALESCE(c.parent_id, c.id)'),
     GroupBy.tag => ('LEFT JOIN transaction_tags tt ON tt.transaction_id = transactions.id', 'tt.tag_id'),
     GroupBy.account => ('', 'transactions.account_id'),
   };
   return db.customSelect('''
-    SELECT $key AS k, SUM($sign * ($effSql)) AS total, COUNT(*) AS n
+    SELECT $key AS k, SUM($sign * (${g == GroupBy.category ? catEff : effSql})) AS total, COUNT(*) AS n
     FROM transactions $join
     WHERE $_base AND transactions.kind = '$kind' AND ${p.where}
     GROUP BY k HAVING total > 0 ORDER BY total DESC
-  ''', variables: p.vars, readsFrom: {db.transactions, db.categories, db.transactionTags, db.splits}).watch().map(
+  ''', variables: p.vars, readsFrom: {db.transactions, db.categories, db.transactionTags, db.splits, db.txParts}).watch().map(
         (rows) => [for (final r in rows) Slice(key: r.read<int?>('k'), total: r.read<int>('total'), count: r.read<int>('n'))],
       );
 });
@@ -122,12 +127,12 @@ class BudgetStatus {
 
 Selectable<QueryRow> _budgetRows(AppDb db, int ym) => db.customSelect('''
     SELECT b.id AS id,
-      (SELECT COALESCE(SUM(-($effSql)), 0) FROM transactions
+      (SELECT COALESCE(SUM(-($catEff)), 0) FROM transactions $partJoin
         WHERE $_base AND transactions.kind = 'expense' AND transactions.jalali_ym = ?1
-          AND (transactions.category_id = b.category_id
-               OR transactions.category_id IN (SELECT id FROM categories WHERE parent_id = b.category_id))) AS spent
+          AND ($catKey = b.category_id
+               OR $catKey IN (SELECT id FROM categories WHERE parent_id = b.category_id))) AS spent
     FROM budgets b WHERE b.from_ym <= ?1 AND (b.to_ym IS NULL OR b.to_ym >= ?1)
-  ''', variables: [Variable.withInt(ym)], readsFrom: {db.budgets, db.transactions, db.categories, db.splits});
+  ''', variables: [Variable.withInt(ym)], readsFrom: {db.budgets, db.transactions, db.categories, db.splits, db.txParts});
 
 Future<List<BudgetStatus>> _budgetStatuses(AppDb db, List<QueryRow> rows) async {
   final budgets = {for (final b in await db.select(db.budgets).get()) b.id: b};
@@ -170,8 +175,8 @@ Future<Leaks> computeLeaks(AppDb db, int ym, int smallLimit) async {
     prev3 = prevYm(prev3);
   }
   final cat = await db.customSelect('''
-    SELECT COALESCE(c.parent_id, c.id) AS k, transactions.jalali_ym AS ym, SUM(-($effSql)) AS total
-    FROM transactions JOIN categories c ON c.id = transactions.category_id
+    SELECT COALESCE(c.parent_id, c.id) AS k, transactions.jalali_ym AS ym, SUM(-($catEff)) AS total
+    FROM transactions $partJoin JOIN categories c ON c.id = $catKey
     WHERE $_base AND transactions.kind = 'expense' AND transactions.jalali_ym BETWEEN ? AND ?
     GROUP BY k, ym
   ''', variables: [Variable.withInt(prev3), Variable.withInt(ym)]).get();
@@ -209,7 +214,7 @@ Future<Leaks> computeLeaks(AppDb db, int ym, int smallLimit) async {
 
 final leaksProvider = StreamProvider.family<Leaks, LeakKey>((ref, k) {
   final db = ref.watch(dbProvider);
-  final List<ResultSetImplementation> watched = [db.transactions, db.categories, db.recurrings, db.splits];
+  final List<ResultSetImplementation> watched = [db.transactions, db.categories, db.recurrings, db.splits, db.txParts];
   return db.tableUpdates(TableUpdateQuery.onAllTables(watched)).asyncMap((_) => computeLeaks(db, k.$1, k.$2)).startWith(() => computeLeaks(db, k.$1, k.$2));
 });
 

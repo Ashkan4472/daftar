@@ -2653,6 +2653,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Balance is negative (overdraft)'**
   String get balanceNegative;
+
+  /// No description provided for @catSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split by category'**
+  String get catSplit;
+
+  /// No description provided for @editCatSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category split'**
+  String get editCatSplit;
+
+  /// No description provided for @removeCatSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove category split'**
+  String get removeCatSplit;
+
+  /// No description provided for @catSplitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into {n} categories'**
+  String catSplitCount(int n);
+
+  /// No description provided for @addPart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addPart;
+
+  /// No description provided for @partsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left to assign'**
+  String get partsLeft;
+
+  /// No description provided for @catSplitInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Need at least two categories, and the parts must add up to the total.'**
+  String get catSplitInvalid;
+
+  /// No description provided for @catSplitStale.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount changed. Redo the category split.'**
+  String get catSplitStale;
 }
 
 class _AppLocalizationsDelegate

@@ -825,5 +825,20 @@
   "balanceComputed": "Calculated from transactions",
   "balanceClear": "Use automatic balance again",
   "balanceTotal": "Total",
-  "balanceNegative": "Balance is negative (overdraft)"
+  "balanceNegative": "Balance is negative (overdraft)",
+  "catSplit": "Split by category",
+  "editCatSplit": "Edit category split",
+  "removeCatSplit": "Remove category split",
+  "catSplitCount": "Split into {n} categories",
+  "@catSplitCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "addPart": "Add category",
+  "partsLeft": "Left to assign",
+  "catSplitInvalid": "Need at least two categories, and the parts must add up to the total.",
+  "catSplitStale": "The amount changed. Redo the category split."
 }

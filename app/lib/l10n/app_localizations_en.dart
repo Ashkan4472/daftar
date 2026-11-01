@@ -1422,4 +1422,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get balanceNegative => 'Balance is negative (overdraft)';
+
+  @override
+  String get catSplit => 'Split by category';
+
+  @override
+  String get editCatSplit => 'Edit category split';
+
+  @override
+  String get removeCatSplit => 'Remove category split';
+
+  @override
+  String catSplitCount(int n) {
+    return 'Split into $n categories';
+  }
+
+  @override
+  String get addPart => 'Add category';
+
+  @override
+  String get partsLeft => 'Left to assign';
+
+  @override
+  String get catSplitInvalid =>
+      'Need at least two categories, and the parts must add up to the total.';
+
+  @override
+  String get catSplitStale => 'The amount changed. Redo the category split.';
 }
