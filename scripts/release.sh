@@ -20,4 +20,4 @@ for abi in arm64-v8a armeabi-v7a; do
 done
 
 git push origin HEAD "$tag"
-gh release create "$tag" dist/*.apk --title "Daftar $ver" --generate-notes
+gh release create "$tag" dist/*.apk --title "Daftar $ver" --generate-notes --notes "**Installing:** Play Protect may warn that Daftar is from an unknown developer. The APK is signed with the project's own release key, and Google has not seen that key before. Tap \"More details\", then \"Install anyway\". Updates signed with the same key install over the existing app and keep your data."

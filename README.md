@@ -9,3 +9,7 @@ Local-only expense tracker for Android. Reads bank SMS, categorizes by hand, tra
 - `docs/PLAN.md`, `docs/TASKS.md` Plan and progress. `design-system/daftar/MASTER.md` UI rules.
 - `app/tool/strings.py` regenerates the English/Persian strings; `app/tool/make_brand.py` redraws the logo.
 - Performance check: `cd app && flutter test test/perf_test.dart` (seeds 1M transactions).
+
+## Installing
+
+Download the APK for your phone from the Releases page (arm64-v8a for most phones). Play Protect may warn that Daftar is from an unknown developer. The APK is signed with the project's own release key, and Google has not seen that key before. Tap "More details", then "Install anyway". Updates signed with the same key install over the existing app and keep your data.
