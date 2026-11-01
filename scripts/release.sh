@@ -12,7 +12,7 @@ tag="v$ver"
 
 (cd packages/core && dart test)
 (cd cli && dart test)
-(cd app && flutter test && flutter build apk --release --no-tree-shake-icons --split-per-abi)
+(cd app && { flutter pub get --offline || flutter pub get; } && flutter test --no-pub && flutter build apk --no-pub --release --no-tree-shake-icons --split-per-abi)
 
 rm -rf dist && mkdir dist
 for abi in arm64-v8a armeabi-v7a; do
