@@ -1,0 +1,829 @@
+{
+  "@@locale": "en",
+  "appName": "Daftar",
+  "tabHome": "Home",
+  "tabTransactions": "Transactions",
+  "tabReports": "Reports",
+  "tabPeople": "People",
+  "add": "Add",
+  "income": "Income",
+  "expense": "Expense",
+  "net": "Net",
+  "balance": "Balance",
+  "accounts": "Accounts",
+  "rial": "Rial",
+  "toman": "Toman",
+  "settings": "Settings",
+  "language": "Language",
+  "showToman": "Show amounts in Toman",
+  "comingSoon": "Coming soon",
+  "prevMonth": "Previous month",
+  "nextMonth": "Next month",
+  "back": "Back",
+  "importSms": "Import SMS",
+  "importSmsTitle": "Import SMS by date",
+  "from": "From",
+  "to": "To",
+  "startImport": "Start import",
+  "cancel": "Cancel",
+  "importProgress": "{done} / {total} SMS",
+  "@importProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importDone": "Imported {added} transactions, {unmatched} unmatched SMS",
+  "@importDone": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "unmatched": {
+        "type": "int"
+      }
+    }
+  },
+  "smsPermissionDenied": "SMS permission is needed to read bank messages.",
+  "importHint": "Pick the dates to scan. Already imported messages are skipped, so you can safely repeat this.",
+  "importFirstTitle": "Bring in your bank SMS",
+  "importFirstHint": "Daftar reads your bank messages on this phone and turns them into transactions. Nothing leaves your device.",
+  "unmatchedSms": "Unmatched SMS",
+  "netThisMonth": "Net this month",
+  "savingsRate": "Saved {pct}%",
+  "@savingsRate": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "toReview": "To review",
+  "toReviewCount": "{count, plural, =0{Nothing to review} =1{1 transaction needs a category} other{{count} transactions need a category}}",
+  "@toReviewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewNow": "Review",
+  "recent": "Recent",
+  "seeAll": "See all",
+  "noTransactions": "No transactions here",
+  "noTransactionsHint": "Import your bank SMS or add one by hand.",
+  "noResults": "Nothing matches",
+  "noResultsHint": "Try different words or clear the filters.",
+  "search": "Search notes and SMS",
+  "filterAll": "All",
+  "filterExpense": "Expenses",
+  "filterIncome": "Income",
+  "filterToReview": "To review",
+  "filterMarked": "Marked",
+  "filterGap": "Balance gaps",
+  "moreFilters": "More filters",
+  "clearFilters": "Clear filters",
+  "allMonths": "All months",
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applyFilters": "Show results",
+  "uncategorized": "Uncategorized",
+  "category": "Category",
+  "categories": "Categories",
+  "tags": "Tags",
+  "tag": "Tag",
+  "expenseCategories": "Expense",
+  "incomeCategories": "Income",
+  "allOf": "All {name}",
+  "@allOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newCategory": "New category",
+  "editCategory": "Edit category",
+  "newTag": "New tag",
+  "editTag": "Edit tag",
+  "parentCategory": "Parent category",
+  "noParent": "None (top level)",
+  "name": "Name",
+  "nameRequired": "Enter a name",
+  "icon": "Icon",
+  "color": "Color",
+  "chooseIcon": "Choose icon",
+  "searchIcons": "Search icons (e.g. food, car)",
+  "iconWeight": "Style",
+  "archive": "Archive",
+  "unarchive": "Restore from archive",
+  "archived": "Archived",
+  "mergeInto": "Merge into…",
+  "mergeConfirm": "Move all transactions to “{name}” and archive this category?",
+  "@mergeConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "merge": "Merge",
+  "deleteTagConfirm": "Delete this tag from all transactions?",
+  "addTransaction": "Add transaction",
+  "typeExpense": "Expense",
+  "typeIncome": "Income",
+  "amount": "Amount",
+  "amountRequired": "Enter an amount",
+  "date": "Date",
+  "time": "Time",
+  "account": "Account",
+  "note": "Note",
+  "addNote": "Add a note",
+  "save": "Save",
+  "done": "Done",
+  "edit": "Edit",
+  "delete": "Delete",
+  "undo": "Undo",
+  "movedToTrash": "Moved to trash",
+  "mark": "Mark",
+  "unmark": "Remove mark",
+  "excludeFromReports": "Exclude from reports",
+  "excludeHint": "Use for transfers or money that is not really yours.",
+  "originalSms": "Original SMS",
+  "balanceAfter": "Balance after",
+  "sourceSms": "From SMS",
+  "sourceManual": "Added by hand",
+  "sourceImport": "Imported",
+  "gapTitle": "Balance does not add up",
+  "gapExplain": "{amount} is unaccounted for since the previous SMS. A message may be missing, or money moved in another way.",
+  "@gapExplain": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "needsReviewHint": "Read by a generic rule. Check the amount.",
+  "trash": "Trash",
+  "trashEmpty": "Trash is empty",
+  "trashHint": "Items are removed for good after 30 days.",
+  "restore": "Restore",
+  "transfer": "Transfer",
+  "reviewTitle": "Review",
+  "reviewProgress": "{done} of {total}",
+  "@reviewProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewDone": "All caught up",
+  "reviewDoneHint": "Every transaction has a category.",
+  "skip": "Skip",
+  "previous": "Previous",
+  "sameAsLast": "Same as last time",
+  "pickCategory": "Pick a category",
+  "settingsGeneral": "General",
+  "settingsData": "Data",
+  "settingsOrganize": "Organize",
+  "manageAccounts": "Accounts",
+  "newAccount": "New account",
+  "editAccount": "Edit account",
+  "openingBalance": "Opening balance",
+  "heroIncome": "Income",
+  "heroSpent": "Spent",
+  "accountTransactions": "{name}",
+  "@accountTransactions": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "totalBalance": "Total balance",
+  "balanceNote": "Bank balances come from your latest SMS.",
+  "manageCategories": "Categories",
+  "manageTags": "Tags",
+  "noArchived": "No archived categories",
+  "subcategories": "Subcategories",
+  "addSubcategory": "Add subcategory",
+  "inUse": "{count} transactions",
+  "@inUse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "delete_": "Delete",
+  "unmatchedHint": "These messages look financial but no pattern fits. Teach Daftar the format, or ignore them.",
+  "unmatchedEmpty": "Nothing unmatched",
+  "ignoreSender": "Ignore this sender",
+  "ignoreMessage": "Dismiss",
+  "teachFormat": "Teach format",
+  "senderIgnored": "Sender ignored",
+  "settingsAbout": "About",
+  "aboutText": "Daftar keeps everything on this phone. No account, no cloud.",
+  "restored": "Restored",
+  "reportsTitle": "Reports",
+  "periodMonth": "Month",
+  "periodRange": "Date range",
+  "groupCategory": "Category",
+  "groupTag": "Tag",
+  "groupAccount": "Account",
+  "spentTotal": "Total spent",
+  "earnedTotal": "Total income",
+  "otherSlice": "Other",
+  "trend12": "Last 12 months",
+  "vsLastMonth": "{pct}% vs last month",
+  "@vsLastMonth": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsOverlap": "A transaction with several tags counts under each of them.",
+  "noDataPeriod": "No data in this period",
+  "budgets": "Budgets",
+  "leaks": "Leaks",
+  "budgetsHint": "Set a monthly limit per category.",
+  "newBudget": "New budget",
+  "editBudget": "Edit budget",
+  "monthlyLimit": "Monthly limit",
+  "budgetSpent": "{spent} of {limit}",
+  "@budgetSpent": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetLeft": "{amount} left",
+  "@budgetLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOver": "{amount} over",
+  "@budgetOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "noBudgets": "No budgets yet",
+  "removeBudget": "Remove budget",
+  "pickCategoryFirst": "Choose a category",
+  "leaksTitle": "Where money leaks",
+  "leaksHint": "Patterns worth a second look this month.",
+  "leakSpike": "{name} is {pct}% above your usual",
+  "@leakSpike": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "leakSpikeDetail": "{now} this month, usually about {avg}.",
+  "@leakSpikeDetail": {
+    "placeholders": {
+      "now": {
+        "type": "String"
+      },
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "leakSmall": "{count} small purchases added up to {total}",
+  "@leakSmall": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "leakSmallDetail": "Each one under {limit}. Small amounts hide in the noise.",
+  "@leakSmallDetail": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "leakUncategorized": "{count} transactions have no category ({total})",
+  "@leakUncategorized": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "leakUncategorizedDetail": "Reports are incomplete until they are categorized.",
+  "leakGaps": "{count} places where the balance does not add up",
+  "@leakGaps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leakGapsDetail": "{total} moved without a matching SMS.",
+  "@leakGapsDetail": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "leakRecurring": "{count} repeating charges not confirmed",
+  "@leakRecurring": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leakRecurringDetail": "Confirm them to track upcoming bills.",
+  "leaksNone": "No leaks found",
+  "leaksNoneHint": "Nothing unusual this month.",
+  "viewTransactions": "View transactions",
+  "smallLimit": "Small purchase limit",
+  "newPerson": "New person",
+  "editPerson": "Edit person",
+  "phone": "Phone (optional)",
+  "noPeople": "No one yet",
+  "noPeopleHint": "Add people to split costs and track who owes whom.",
+  "owesYou": "owes you",
+  "youOwe": "you owe",
+  "allSettled": "All settled",
+  "owedToYou": "Owed to you",
+  "owedByYou": "You owe",
+  "settleUp": "Settle up",
+  "theyOweMe": "They owe me",
+  "iOweThem": "I owe them",
+  "ledger": "History",
+  "noLedger": "No history yet",
+  "sharedExpense": "Shared expense",
+  "settlementEntry": "Settlement",
+  "deleteEntry": "Delete entry",
+  "deletePerson": "Delete person",
+  "personHasHistory": "This person has history, so they cannot be deleted. Settle up instead.",
+  "splitWith": "Split with people",
+  "editSplit": "Edit split",
+  "splitEqual": "Equal",
+  "splitPercent": "Percent",
+  "splitExact": "Amounts",
+  "myShare": "My share",
+  "splitInvalid": "The shares add up to more than the total.",
+  "pickPeople": "Choose at least one person",
+  "removeSplit": "Remove split",
+  "linkDeposit": "Link to the deposit you received",
+  "noLink": "Not linked",
+  "linkedHint": "A linked deposit is left out of income.",
+  "owesAmount": "{name} owes {amount}",
+  "@owesAmount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneHint": "Phone",
+  "reminder": "Remind me",
+  "notifCaptureTitle": "{amount} · {account}",
+  "@notifCaptureTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "notifCaptureBody": "Tap to categorize",
+  "notifActionCategorize": "Categorize",
+  "notifActionNote": "Note",
+  "notifActionMark": "Mark",
+  "notifNoteLabel": "Your note",
+  "notifBudgetWarn": "{name} budget is at {pct}%",
+  "@notifBudgetWarn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "notifBudgetOver": "{name} budget exceeded",
+  "@notifBudgetOver": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifBudgetBody": "{spent} of {limit} spent this month.",
+  "@notifBudgetBody": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSummaryTitle": "{month} summary",
+  "@notifSummaryTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSummaryBody": "Income {income} · Spent {spent} · Net {net}",
+  "@notifSummaryBody": {
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSummaryTop": "Top: {list}",
+  "@notifSummaryTop": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSummaryReview": "{count} to review",
+  "@notifSummaryReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifTransferTitle": "Possible transfer",
+  "notifTransferBody": "{amount} from {from} to {to}",
+  "@notifTransferBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "notifRecurringTitle": "{amount} due soon",
+  "@notifRecurringTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "notifLeakTitle": "{name} is spiking",
+  "@notifLeakTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inbox": "Notifications",
+  "inboxEmpty": "No notifications yet",
+  "markAllRead": "Mark all read",
+  "notifSettings": "Notifications",
+  "notifTypeCapture": "New transaction from SMS",
+  "notifTypeBudget": "Budget alerts",
+  "notifTypeLeak": "Leak alerts",
+  "notifTypeSummary": "Monthly summary",
+  "notifTypeTransfer": "Possible transfers",
+  "notifPermission": "Allow notifications",
+  "notifPermissionHint": "Needed to show new transactions and reminders.",
+  "exactAlarmHint": "Allow exact alarms so reminders arrive on time.",
+  "autoSync": "Live SMS capture",
+  "autoSyncHint": "New bank SMS become transactions within a minute, even when the app is closed.",
+  "batteryHint": "If captures stop, exclude Daftar from battery optimization.",
+  "openBatterySettings": "Battery settings",
+  "transferTitle": "Transfer between your accounts?",
+  "transferBody": "{amount}: {from} → {to}",
+  "@transferBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "yesTransfer": "Yes, transfer",
+  "notTransfer": "No",
+  "recurringTitle": "Repeating charges",
+  "recurringEmpty": "Nothing repeating yet",
+  "recurringEmptyHint": "Daftar spots charges that come back every month.",
+  "recurringEvery": "about every {days} days",
+  "@recurringEvery": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringNext": "Next: {date}",
+  "@recurringNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRecurring": "Confirm",
+  "dismissRecurring": "Not repeating",
+  "upcoming": "Upcoming",
+  "remindBefore": "Remind 1 day before",
+  "reminderSet": "Reminder set",
+  "reminderTitle": "Reminder",
+  "remindMe": "Remind me",
+  "reminders": "Reminders",
+  "pickReminderTime": "Pick date and time",
+  "reminderText": "What to remember",
+  "reminderInPast": "Pick a time in the future",
+  "removeReminder": "Remove",
+  "backupTitle": "Backup & export",
+  "backupCreate": "Create encrypted backup",
+  "backupCreateHint": "One file with everything, locked with a password. Only you can open it.",
+  "backupRestore": "Restore from backup",
+  "backupRestoreHint": "Replaces everything on this phone with the backup.",
+  "backupPassword": "Backup password",
+  "backupPasswordAgain": "Repeat password",
+  "backupPasswordHint": "Write it down. Without it the backup cannot be opened.",
+  "passwordMismatch": "The passwords do not match",
+  "passwordShort": "Use at least 6 characters",
+  "backupWorking": "Encrypting… this can take a minute for big data.",
+  "backupSaved": "Backup saved",
+  "backupSave": "Save to files",
+  "backupShare": "Share",
+  "backupLast": "Last backup: {date}",
+  "@backupLast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupNever": "No backup yet",
+  "backupNudge": "Back up your data",
+  "backupNudgeHint": "It has been a while since your last backup.",
+  "restoreConfirm": "Replace all data on this phone with this backup? A safety copy of the current data is kept.",
+  "restoreDone": "Backup restored",
+  "restoreFailed": "Could not open the backup: {error}",
+  "@restoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreWrongFile": "That file is not a Daftar backup.",
+  "exportCsv": "Export to CSV",
+  "exportCsvHint": "Opens in Excel or Google Sheets, Persian text included.",
+  "exportRange": "Date range",
+  "exportAll": "All time",
+  "exportThisMonth": "This month",
+  "exportCustom": "Pick dates…",
+  "exportDone": "{count} rows exported",
+  "@exportDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCsv": "Import from CSV",
+  "importCsvHint": "Daftar exports, or a bank statement you mapped yourself.",
+  "csvMapTitle": "Match columns",
+  "csvColDate": "Date",
+  "csvColTime": "Time (optional)",
+  "csvColAmount": "Amount",
+  "csvColNote": "Note (optional)",
+  "csvColCategory": "Category (optional)",
+  "csvColAccount": "Account (optional)",
+  "csvColTags": "Tags (optional)",
+  "csvNone": "— none —",
+  "csvAccountDefault": "Account for rows without one",
+  "csvAmountUnit": "Amounts are in",
+  "csvInvertSign": "Positive numbers are expenses",
+  "csvPreview": "Preview",
+  "csvImportRows": "Import {count} rows",
+  "@csvImportRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImported": "{added} added, {skipped} skipped (duplicates or unreadable)",
+  "@csvImported": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "csvNeedDate": "Choose the date and amount columns",
+  "cliHint": "On a computer, the daftar command-line tool can open a backup without the phone.",
+  "securityTitle": "Security",
+  "lockEnable": "Lock the app",
+  "lockEnableHint": "Ask for a PIN when you open Daftar.",
+  "lockBiometric": "Use fingerprint or face",
+  "lockTimeout": "Lock after leaving the app",
+  "lockImmediately": "Immediately",
+  "lockAfter1": "After 1 minute",
+  "lockAfter5": "After 5 minutes",
+  "lockChangePin": "Change PIN",
+  "lockSetPin": "Choose a PIN",
+  "lockRepeatPin": "Repeat the PIN",
+  "lockEnterPin": "Enter your PIN",
+  "lockWrongPin": "Wrong PIN",
+  "lockMismatch": "PINs did not match. Try again.",
+  "lockTooMany": "Too many attempts. Wait {seconds} seconds.",
+  "@lockTooMany": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "lockBioReason": "Unlock Daftar",
+  "lockUseBio": "Use fingerprint",
+  "lockHideScreen": "Hide in app switcher, block screenshots",
+  "lockDisable": "Turn off lock",
+  "lockForgot": "Forgot your PIN? Restore a backup after reinstalling.",
+  "welcomeTitle": "Welcome to Daftar",
+  "welcomeHint": "Your money, on your phone only. Let us set up three things.",
+  "welcomeSms": "Read bank SMS",
+  "welcomeSmsHint": "So transactions appear by themselves.",
+  "welcomeNotif": "Show notifications",
+  "welcomeNotifHint": "For new transactions, budgets and reminders.",
+  "welcomeLock": "Protect with a PIN",
+  "welcomeLockHint": "Optional, you can do it later in Settings.",
+  "welcomeStart": "Continue to import",
+  "welcomeDone": "Done",
+  "builderTitle": "Teach Daftar this SMS",
+  "builderHint": "Tap the parts of the message: the amount, the balance, the date, the account. Daftar will learn the format for this sender.",
+  "roleAmount": "Amount",
+  "roleBalance": "Balance",
+  "roleDate": "Date / time",
+  "roleAccount": "Account",
+  "roleWord": "Direction word",
+  "roleClear": "Clear",
+  "builderExpenseWord": "Word that means money out (e.g. برداشت)",
+  "builderPreview": "What Daftar reads",
+  "builderNoMatch": "The pattern does not match this message yet.",
+  "builderNeedAmount": "Tap the amount, and a +/− sign or a direction word.",
+  "builderMatches": "Also fits {count} other unmatched messages from this sender.",
+  "@builderMatches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "builderSave": "Save and import these",
+  "builderSaved": "Saved. {added} transactions added.",
+  "@builderSaved": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      }
+    }
+  },
+  "builderAdvanced": "Edit pattern (advanced)",
+  "builderBank": "Bank",
+  "builderOtherBank": "Other / unknown",
+  "dataSafety": "Data safety",
+  "presetThisMonth": "This month",
+  "presetLastMonth": "Last month",
+  "preset3Months": "Last 3 months",
+  "presetYear": "This year",
+  "importResultHint": "Open Transactions to review what was found.",
+  "accountKindBank": "Bank account",
+  "accountKindCash": "Cash / wallet",
+  "accountBank": "Bank",
+  "accountNumber": "Account or card number",
+  "accountNumberHint": "Exactly as it appears in the bank SMS, so new messages land here.",
+  "accountNumberTaken": "Another account already uses this number",
+  "archiveAccount": "Archive account",
+  "archivedAccounts": "Archived accounts",
+  "typeTransfer": "Transfer",
+  "transferFrom": "From account",
+  "transferTo": "To account",
+  "transferPick": "Pick two different accounts",
+  "transferManualHint": "Bank-to-bank moves are paired from SMS automatically. Use this for cash and accounts without SMS.",
+  "accountBalanceNow": "Balance",
+  "themeTitle": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "kpiDailyAvg": "Daily average",
+  "kpiTransactions": "Transactions",
+  "kpiLargest": "Largest expense",
+  "paceTitle": "Spending pace",
+  "paceHint": "Running total of spending, day by day",
+  "paceThis": "This month",
+  "paceLast": "Last month",
+  "paceDay": "Day {day}",
+  "@paceDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayTitle": "By day of the week",
+  "topExpensesTitle": "Biggest expenses",
+  "uncatNudge": "Most of this is uncategorized. Categorize it to see where the money goes.",
+  "trendNet": "Net per month",
+  "noExpensesPeriod": "No expenses in this period",
+  "balanceUpdate": "Update balance",
+  "balanceUpdateTitle": "Set current balance",
+  "balanceSetHint": "Daftar starts from this amount and adds later transactions that have no balance of their own. A newer SMS balance replaces it automatically.",
+  "balanceAsOf": "Balance as of",
+  "balanceFromSms": "From SMS · {when}",
+  "@balanceFromSms": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceSetByYou": "Set by you · {when}",
+  "@balanceSetByYou": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceComputed": "Calculated from transactions",
+  "balanceClear": "Use automatic balance again",
+  "balanceTotal": "Total",
+  "balanceNegative": "Balance is negative (overdraft)"
+}
