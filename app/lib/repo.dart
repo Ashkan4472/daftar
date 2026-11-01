@@ -80,8 +80,11 @@ class TxFilter {
 }
 
 class TxRow {
-  const TxRow(this.tx, this.account, this.category, this.tagIds);
+  const TxRow(this.tx, this.account, this.category, this.tagIds, [this.partAmount]);
   final Transaction tx;
+
+  /// Set when a category filter matched one part of a split transaction: that part's Rial.
+  final int? partAmount;
   final Account account;
   final Category? category;
   final List<int> tagIds;
@@ -144,6 +147,10 @@ class Repo {
     final q = db.select(db.transactions).join([
       innerJoin(db.accounts, db.accounts.id.equalsExp(db.transactions.accountId)),
       leftOuterJoin(db.categories, db.categories.id.equalsExp(db.transactions.categoryId)),
+      // With a category filter a split transaction shows once per matching part.
+      if (f.categoryIds != null)
+        leftOuterJoin(
+            db.txParts, db.txParts.transactionId.equalsExp(db.transactions.id) & db.txParts.categoryId.isIn(f.categoryIds!)),
     ])
       ..addColumns([_tagIds])
       ..where(_where(db, f))
@@ -157,6 +164,7 @@ class Repo {
         r.readTable(db.accounts),
         r.readTableOrNull(db.categories),
         [for (final s in (r.read(_tagIds) ?? '').split(',')) if (s.isNotEmpty) int.parse(s)],
+        r.readTableOrNull(db.txParts)?.amount,
       );
 
   Stream<List<TxRow>> watch(TxFilter f, int limit) => query(f, limit: limit).watch().map((rs) => rs.map(_row).toList());

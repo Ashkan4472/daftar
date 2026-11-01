@@ -25,6 +25,10 @@ void main() {
     expect({for (final r in slices) r.read<int>('k'): r.read<int>('t')}, {a: 30000, b: 70000});
     expect((await repo.get(id))!.tx.categoryId, b); // largest part
 
+    final byCat = await repo.query(TxFilter(categoryIds: [a])).get();
+    expect(byCat.length, 1); // one row per matching part, showing that part
+    expect(byCat.single.read(db.txParts.amount), 30000);
+
     await repo.updateManual(id, amount: -50000, at: at); // amount changed -> split dropped
     expect(await db.select(db.txParts).get(), isEmpty);
 

@@ -21,11 +21,14 @@ void main() {
         CREATE TABLE splits (transaction_id INTEGER, person_id INTEGER);
         CREATE TABLE transactions (id INTEGER PRIMARY KEY, account_id INTEGER, category_id INTEGER, amount INTEGER,
           occurred_at INTEGER, kind TEXT, note TEXT, balance_after INTEGER, deleted_at INTEGER);
+        CREATE TABLE tx_parts (id INTEGER PRIMARY KEY, transaction_id INTEGER, category_id INTEGER, amount INTEGER);
         INSERT INTO accounts VALUES (1, 'Resalat 10.11228735.1');
         INSERT INTO categories VALUES (1, 'Transport', NULL), (2, 'Taxi', 1);
         INSERT INTO tags VALUES (1, 'work');
         INSERT INTO transaction_tags VALUES (1, 1);
         INSERT INTO transactions VALUES (1, 1, 2, -2500000, 1792858080, 'expense', 'taxi, "fast"', 825063832, NULL);
+        INSERT INTO transactions VALUES (3, 1, 1, -100000, 1792858081, 'expense', 'mixed', NULL, NULL);
+        INSERT INTO tx_parts VALUES (1, 3, 1, 70000), (2, 3, 2, 30000);
         INSERT INTO transactions VALUES (2, 1, NULL, -100, 1792858080, 'expense', 'trashed', NULL, 1792858090);
       ''');
     db.close();
@@ -41,13 +44,16 @@ void main() {
     final exp = await Process.run('dart', ['run', 'bin/daftar.dart', 'export', '${dir.path}/b.daftar', '-o', '${dir.path}/out.csv'], environment: env);
     expect(exp.exitCode, 0, reason: '${exp.stderr}');
     final rows = parseCsv(File('${dir.path}/out.csv').readAsStringSync());
-    expect(rows.length, 2); // header + the one live transaction
+    expect(rows.length, 4); // header + plain transaction + the 2 parts of the split one
     expect(rows[1][3], 'Resalat 10.11228735.1');
     expect(rows[1][5], '-2500000');
     expect(rows[1][6], 'Transport');
     expect(rows[1][7], 'Taxi');
     expect(rows[1][8], 'work');
     expect(rows[1][9], 'taxi, "fast"');
+    expect(rows[1][12], '');
+    expect([rows[2][5], rows[2][6], rows[2][12]], ['-70000', 'Transport', '3:-100000']);
+    expect([rows[3][5], rows[3][6], rows[3][7], rows[3][12]], ['-30000', 'Transport', 'Taxi', '3:-100000']);
 
     final bad = await Process.run('dart', ['run', 'bin/daftar.dart', 'decrypt', '${dir.path}/b.daftar', '-o', '${dir.path}/x'], environment: {'DAFTAR_PASSWORD': 'wrong'});
     expect(bad.exitCode, 1);

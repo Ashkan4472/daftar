@@ -343,7 +343,9 @@ class TransactionTile extends ConsumerWidget {
     final gap = tx.balanceGap ?? 0;
     final isTransfer = tx.kind == TxKind.transfer;
     final title = isTransfer ? l.transfer : c == null ? l.uncategorized : displayName(c.name, c.nameKey, prefs.lang);
+    final part = row.partAmount;
     final sub = [
+      if (part != null) prefs.money(tx.amount.abs()),
       if (tx.note.isNotEmpty) tx.note else row.account.name,
       fmtTime(prefs, tx.occurredAt),
     ].join(' · ');
@@ -389,7 +391,7 @@ class TransactionTile extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Amount(tx.amount, neutral: isTransfer),
+                Amount(part == null ? tx.amount : (tx.amount < 0 ? -part : part), neutral: isTransfer),
                 if (tx.balanceAfter != null)
                   Text(prefs.money(tx.balanceAfter!), textDirection: TextDirection.ltr, style: t.bodySmall?.copyWith(color: muted, fontFeatures: tabular)),
               ]),

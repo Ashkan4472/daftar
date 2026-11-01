@@ -24,25 +24,38 @@ Future<(String csv, int count)> exportTransactions(AppDb db, TxFilter f) async {
     for (final r in peopleRows) {
       people.putIfAbsent(r.read<int>('t'), () => []).add(r.read<String>('n'));
     }
+    final partRows = await db.customSelect(
+      'SELECT transaction_id AS t, category_id AS c, amount AS a FROM tx_parts WHERE transaction_id IN (${ids.join(',')}) ORDER BY amount DESC',
+    ).get();
+    final parts = <int, List<(int, int)>>{};
+    for (final r in partRows) {
+      parts.putIfAbsent(r.read<int>('t'), () => []).add((r.read<int>('c'), r.read<int>('a')));
+    }
     for (final r in got) {
       final t = r.readTable(db.transactions);
       final c = cats[t.categoryId];
-      final parent = cats[c?.parentId];
       final tagIds = (r.read(CustomExpression<String>('(SELECT group_concat(tag_id) FROM transaction_tags WHERE transaction_id = transactions.id)')) ?? '')
           .split(',')
           .where((s) => s.isNotEmpty);
-      rows.add(ExportRow(
-        at: t.occurredAt,
-        account: r.readTable(db.accounts).name,
-        kind: t.kind.name,
-        amount: t.amount,
-        category: (parent ?? c)?.name ?? '',
-        subcategory: parent == null ? '' : c!.name,
-        tags: [for (final id in tagIds) tags[int.parse(id)] ?? ''],
-        note: t.note,
-        people: people[t.id] ?? const [],
-        balanceAfter: t.balanceAfter,
-      ));
+      // A category-split transaction becomes one row per part; split_of ties them together.
+      for (final (catId, partAmount) in parts[t.id] ?? [(t.categoryId ?? 0, t.amount.abs())]) {
+        final split = parts.containsKey(t.id);
+        final pc = split ? cats[catId] : c;
+        final pp = cats[pc?.parentId];
+        rows.add(ExportRow(
+          at: t.occurredAt,
+          account: r.readTable(db.accounts).name,
+          kind: t.kind.name,
+          amount: split ? (t.amount < 0 ? -partAmount : partAmount) : t.amount,
+          category: (pp ?? pc)?.name ?? '',
+          subcategory: pp == null ? '' : pc!.name,
+          tags: [for (final id in tagIds) tags[int.parse(id)] ?? ''],
+          note: t.note,
+          people: people[t.id] ?? const [],
+          balanceAfter: t.balanceAfter,
+          splitOf: split ? '${t.id}:${t.amount}' : '',
+        ));
+      }
     }
     if (got.length < chunk) break;
   }
@@ -58,7 +71,7 @@ class CsvMapping {
 
   /// Auto-map the headers of a Daftar export.
   static CsvMapping? fromHeader(List<String> h) {
-    if (!exportHeader.every(h.contains)) return null;
+    if (!requiredExportHeader.every(h.contains)) return null;
     int i(String n) => h.indexOf(n);
     return CsvMapping(
       date: i('date_gregorian'), time: i('time'), amount: i('amount_rial'), note: i('note'),

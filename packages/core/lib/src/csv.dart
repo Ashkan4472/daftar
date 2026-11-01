@@ -61,6 +61,12 @@ List<List<String>> parseCsv(String text) {
 
 const exportHeader = [
   'date_jalali', 'date_gregorian', 'time', 'account', 'kind', 'amount_rial',
+  'category', 'subcategory', 'tags', 'note', 'people', 'balance_after', 'split_of',
+];
+
+/// Headers every Daftar export has had since v1; `split_of` came later, so older files still map.
+const requiredExportHeader = [
+  'date_jalali', 'date_gregorian', 'time', 'account', 'kind', 'amount_rial',
   'category', 'subcategory', 'tags', 'note', 'people', 'balance_after',
 ];
 
@@ -76,12 +82,16 @@ class ExportRow {
     this.note = '',
     this.people = const [],
     this.balanceAfter,
+    this.splitOf = '',
   });
   final DateTime at;
   final String account, kind, category, subcategory, note;
   final int amount;
   final int? balanceAfter;
   final List<String> tags, people;
+
+  /// Category-split parts of one transaction share this value: "<transaction id>:<total amount>".
+  final String splitOf;
 
   List<String> toCells() {
     final j = Jalali.fromDateTime(at);
@@ -91,7 +101,7 @@ class ExportRow {
       '${at.year}-${p2(at.month)}-${p2(at.day)}',
       '${p2(at.hour)}:${p2(at.minute)}',
       account, kind, '$amount', category, subcategory,
-      tags.join('|'), note, people.join('|'), balanceAfter?.toString() ?? '',
+      tags.join('|'), note, people.join('|'), balanceAfter?.toString() ?? '', splitOf,
     ];
   }
 }
