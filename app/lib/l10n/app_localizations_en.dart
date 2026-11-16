@@ -1314,7 +1314,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mergeAccountWarn =>
-      'All transactions move to the chosen account and this one is removed. New messages with its number go to the chosen account too, so the balance follows the latest SMS. This cannot be undone.';
+      'All transactions move to the chosen account and new messages with this number follow them, so the balance comes from the latest SMS. You can split the account again at any time.';
+
+  @override
+  String get splitAccount => 'Split account';
 
   @override
   String get archiveAccount => 'Archive account';

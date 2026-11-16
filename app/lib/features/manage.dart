@@ -455,6 +455,24 @@ Future<void> editAccount(BuildContext context, WidgetRef ref, [Account? a]) {
                   if (await _mergeAccountDialog(context, ref, a)) nav.pop();
                 },
               ),
+              FutureBuilder<List<(int, String)>>(
+                future: repo.mergedInto(a.id),
+                builder: (ctx, s) => Column(children: [
+                  for (final (id, name) in s.data ?? const <(int, String)>[])
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: OutlinedButton.icon(
+                        icon: Icon(appIcon('git-fork')),
+                        label: Text('${l.splitAccount}: $name'),
+                        onPressed: () async {
+                          final nav = Navigator.of(context);
+                          await repo.splitAccount(id);
+                          nav.pop();
+                        },
+                      ),
+                    ),
+                ]),
+              ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 icon: Icon(appIcon('archive')),

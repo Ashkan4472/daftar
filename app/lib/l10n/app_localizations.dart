@@ -2453,8 +2453,14 @@ abstract class AppLocalizations {
   /// No description provided for @mergeAccountWarn.
   ///
   /// In en, this message translates to:
-  /// **'All transactions move to the chosen account and this one is removed. New messages with its number go to the chosen account too, so the balance follows the latest SMS. This cannot be undone.'**
+  /// **'All transactions move to the chosen account and new messages with this number follow them, so the balance comes from the latest SMS. You can split the account again at any time.'**
   String get mergeAccountWarn;
+
+  /// No description provided for @splitAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Split account'**
+  String get splitAccount;
 
   /// No description provided for @archiveAccount.
   ///

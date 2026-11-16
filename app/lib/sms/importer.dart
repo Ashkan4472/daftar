@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 
 import '../db/database.dart';
+import '../repo.dart';
 import '../theme/palette.dart';
 
 class SmsMessage {
@@ -115,7 +116,8 @@ class SmsImporter {
               address: m.address, body: m.body, receivedAt: m.receivedAt,
               hash: hash, status: SmsStatus.parsed, templateCode: Value(parsed.templateId),
             ));
-        await db.into(db.transactions).insert(TransactionsCompanion.insert(
+        final numberKey = parsed.account ?? 'sms:${m.address}';
+        final txId = await db.into(db.transactions).insert(TransactionsCompanion.insert(
               accountId: accountId,
               amount: parsed.amount,
               occurredAt: parsed.occurredAt,
@@ -127,6 +129,9 @@ class SmsImporter {
               needsReview: Value(parsed.needsReview),
               note: Value(parsed.description ?? ''),
             ));
+        if ((await db.accountAliases()).containsKey(numberKey) && await _numberOwner(numberKey) == null) {
+          await Repo(db).noteAliasTx(numberKey, txId);
+        }
         touched.add(accountId);
         result.added++;
       }
@@ -161,6 +166,9 @@ class SmsImporter {
           ),
         );
   }
+
+  Future<int?> _numberOwner(String number) async =>
+      (await (db.select(db.accounts)..where((a) => a.number.equals(number))).getSingleOrNull())?.id;
 
   Future<int> _resolveAccount(String number, int? bankId) async {
     final found = await (db.select(db.accounts)..where((a) => a.number.equals(number)))

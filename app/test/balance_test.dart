@@ -80,4 +80,43 @@ void main() {
     expect((await db.select(db.accounts).get()).any((a) => a.id == two), isFalse);
     expect((await db.accountAliases())['6037'], 1);
   });
+
+  test('split restores the account, its transactions and its number', () async {
+    final two = await db.into(db.accounts).insert(AccountsCompanion.insert(
+        name: 'Card', kind: AccountKind.bank, icon: 'bank:regular', color: 0, number: const Value('6037'), openingBalance: const Value(70)));
+    await tx(-100, t0, balanceAfter: 5000);
+    final t2 = await db.into(db.transactions).insert(TransactionsCompanion.insert(
+        accountId: two, amount: -200, occurredAt: t0.add(const Duration(hours: 1)), jalaliYm: 140508,
+        kind: TxKind.expense, source: TxSource.sms, balanceAfter: const Value(4800)));
+    final repo = Repo(db);
+    await repo.mergeAccounts(from: two, into: 1);
+    expect(await repo.mergedInto(1), [(two, 'Card')]);
+    // An SMS for card 6037 arrives after the merge and is filed under account 1.
+    final late = await db.into(db.transactions).insert(TransactionsCompanion.insert(
+        accountId: 1, amount: -7, occurredAt: t0.add(const Duration(hours: 3)), jalaliYm: 140508, kind: TxKind.expense, source: TxSource.sms));
+    await repo.noteAliasTx('6037', late);
+    await repo.splitAccount(two);
+    final accs = await db.select(db.accounts).get();
+    expect(accs.firstWhere((a) => a.id == two).openingBalance, 70);
+    expect(accs.firstWhere((a) => a.id == 1).openingBalance, 0);
+    expect((await (db.select(db.transactions)..where((t) => t.id.equals(t2))).getSingle()).accountId, two);
+    expect((await db.accountAliases()).containsKey('6037'), isFalse);
+    expect(await repo.mergedInto(1), isEmpty);
+    expect((await (db.select(db.transactions)..where((t) => t.id.equals(late))).getSingle()).accountId, two);
+    expect((await balance()).balance, 5000);
+  });
+
+  test('chained merges split back level by level', () async {
+    final b = await db.into(db.accounts).insert(AccountsCompanion.insert(name: 'B', kind: AccountKind.cash, icon: 'x', color: 0, number: const Value('b')));
+    final c = await db.into(db.accounts).insert(AccountsCompanion.insert(name: 'C', kind: AccountKind.cash, icon: 'x', color: 0, number: const Value('c')));
+    final repo = Repo(db);
+    await repo.mergeAccounts(from: c, into: b);
+    await repo.mergeAccounts(from: b, into: 1);
+    expect((await db.accountAliases()), {'b': 1, 'c': 1});
+    await repo.splitAccount(b);
+    expect(await repo.mergedInto(b), [(c, 'C')]);
+    expect((await db.accountAliases()), {'c': b});
+    await repo.splitAccount(c);
+    expect(await db.accountAliases(), isEmpty);
+  });
 }

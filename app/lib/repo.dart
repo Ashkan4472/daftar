@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -396,31 +398,80 @@ class Repo {
       (db.update(db.accounts)..where((a) => a.id.equals(accountId)))
           .write(AccountsCompanion(balanceSet: Value(value), balanceSetAt: Value(value == null ? null : at)));
 
-  /// Folds account [from] into [into]: its transactions and recurring items move over, its SMS
-  /// number keeps routing new messages to [into], and [from] is deleted. Balances are then
-  /// anchored on the newest SMS balance of either account, so the dashboard matches the bank.
+  /// Folds account [from] into [into]: its transactions and recurring items move over, and its SMS
+  /// number keeps routing new messages to [into]. Balances are then anchored on the newest SMS
+  /// balance of either account. Everything needed to undo it is logged, see [splitAccount].
   Future<void> mergeAccounts({required int from, required int into}) async {
     if (from == into) return;
     await db.transaction(() async {
       final src = await (db.select(db.accounts)..where((a) => a.id.equals(from))).getSingle();
       final dst = await (db.select(db.accounts)..where((a) => a.id.equals(into))).getSingle();
+      final txIds = await (db.selectOnly(db.transactions)
+            ..addColumns([db.transactions.id])
+            ..where(db.transactions.accountId.equals(from)))
+          .map((r) => r.read(db.transactions.id)!)
+          .get();
+      final recIds = await (db.selectOnly(db.recurrings)
+            ..addColumns([db.recurrings.id])
+            ..where(db.recurrings.accountId.equals(from)))
+          .map((r) => r.read(db.recurrings.id)!)
+          .get();
       await (db.update(db.transactions)..where((t) => t.accountId.equals(from))).write(TransactionsCompanion(accountId: Value(into)));
       await (db.update(db.recurrings)..where((r) => r.accountId.equals(from))).write(RecurringsCompanion(accountId: Value(into)));
+
+      // Opening balances add up; the newer typed-in balance wins.
+      final useSrcSet = src.balanceSet != null &&
+          (dst.balanceSet == null || (src.balanceSetAt != null && (dst.balanceSetAt == null || src.balanceSetAt!.isAfter(dst.balanceSetAt!))));
+      final after = {
+        'opening': dst.openingBalance + src.openingBalance,
+        'set': useSrcSet ? src.balanceSet : dst.balanceSet,
+        'setAt': (useSrcSet ? src.balanceSetAt : dst.balanceSetAt)?.millisecondsSinceEpoch,
+      };
+      await (db.update(db.accounts)..where((a) => a.id.equals(into))).write(AccountsCompanion(
+        openingBalance: Value(after['opening']! as int),
+        balanceSet: Value(useSrcSet ? src.balanceSet : dst.balanceSet),
+        balanceSetAt: Value(useSrcSet ? src.balanceSetAt : dst.balanceSetAt),
+      ));
+
+      final log = await _mergeLog();
+      final children = [for (final e in log.where((e) => e['into'] == from).toList()) e];
+      log.removeWhere((e) => e['into'] == from);
+      log.add({
+        'into': into,
+        'from': {
+          'id': src.id, 'name': src.name, 'bankId': src.bankId, 'number': src.number, 'kind': src.kind.name,
+          'icon': src.icon, 'color': src.color, 'opening': src.openingBalance, 'archived': src.archived,
+          'sort': src.sort, 'set': src.balanceSet, 'setAt': src.balanceSetAt?.millisecondsSinceEpoch,
+        },
+        'txIds': txIds,
+        'recIds': recIds,
+        'before': {'opening': dst.openingBalance, 'set': dst.balanceSet, 'setAt': dst.balanceSetAt?.millisecondsSinceEpoch},
+        'after': after,
+        'children': children,
+      });
+      await _putMergeLog(log);
+
       final aliases = await db.accountAliases();
       for (final e in aliases.entries.toList()) {
         if (e.value == from) aliases[e.key] = into;
       }
       if (src.number != null) aliases[src.number!] = into;
       await db.setAccountAliases(aliases);
-      await (db.update(db.accounts)..where((a) => a.id.equals(into))).write(AccountsCompanion(
-        openingBalance: dst.openingBalance == 0 ? Value(src.openingBalance) : const Value.absent(),
-        bankId: dst.bankId == null ? Value(src.bankId) : const Value.absent(),
-        number: dst.number == null ? Value(src.number) : const Value.absent(),
-        balanceSet: dst.balanceSet == null ? Value(src.balanceSet) : const Value.absent(),
-        balanceSetAt: dst.balanceSet == null ? Value(src.balanceSetAt) : const Value.absent(),
-      ));
+
       await (db.delete(db.accounts)..where((a) => a.id.equals(from))).go();
-      await db.customStatement('''
+      await _recomputeGaps(into);
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> _mergeLog() async {
+    final raw = await setting('account_merges');
+    if (raw == null) return [];
+    return [for (final e in jsonDecode(raw) as List) Map<String, dynamic>.from(e as Map)];
+  }
+
+  Future<void> _putMergeLog(List<Map<String, dynamic>> log) => putSetting('account_merges', jsonEncode(log));
+
+  Future<void> _recomputeGaps(int accountId) => db.customStatement('''
         WITH o AS (
           SELECT id, balance_after - (LAG(balance_after) OVER w + amount) AS gap
           FROM transactions
@@ -428,7 +479,81 @@ class Repo {
           WINDOW w AS (ORDER BY occurred_at, id)
         )
         UPDATE transactions SET balance_gap = o.gap FROM o WHERE o.id = transactions.id
-      ''', [into]);
+      ''', [accountId]);
+
+  /// Accounts that were merged into [into] and can be split off again: (original account id, name).
+  Future<List<(int, String)>> mergedInto(int into) async => [
+        for (final e in await _mergeLog())
+          if (e['into'] == into) ((e['from'] as Map)['id'] as int, (e['from'] as Map)['name'] as String),
+      ];
+
+  /// Records that an SMS arriving under merged number [number] was filed as transaction [txId],
+  /// so a later split takes it along with its account.
+  Future<void> noteAliasTx(String number, int txId) async {
+    final log = await _mergeLog();
+    final e = log.where((e) => (e['from'] as Map)['number'] == number).firstOrNull;
+    if (e == null) return;
+    (e['txIds'] as List).add(txId);
+    await _putMergeLog(log);
+  }
+
+  /// Undoes a merge: brings back account [fromId] with exactly the transactions and recurring
+  /// items it had, plus anything its SMS number received since, and routes its number to it again.
+  Future<void> splitAccount(int fromId) async {
+    await db.transaction(() async {
+      final log = await _mergeLog();
+      final e = log.where((e) => (e['from'] as Map)['id'] == fromId).firstOrNull;
+      if (e == null) return;
+      final into = e['into'] as int;
+      final f = Map<String, dynamic>.from(e['from'] as Map);
+      log.remove(e);
+      final children = [for (final c in e['children'] as List) Map<String, dynamic>.from(c as Map)];
+      log.addAll(children);
+      await _putMergeLog(log);
+
+      DateTime? ms(Object? v) => v == null ? null : DateTime.fromMillisecondsSinceEpoch(v as int);
+      await db.into(db.accounts).insert(AccountsCompanion.insert(
+            id: Value(fromId), name: f['name'] as String, kind: AccountKind.values.byName(f['kind'] as String),
+            icon: f['icon'] as String, color: f['color'] as int, bankId: Value(f['bankId'] as int?),
+            number: Value(f['number'] as String?), openingBalance: Value(f['opening'] as int),
+            archived: Value(f['archived'] as bool), sort: Value(f['sort'] as int),
+            balanceSet: Value(f['set'] as int?), balanceSetAt: Value(ms(f['setAt'])),
+          ));
+      final txIds = [for (final i in e['txIds'] as List) i as int];
+      final recIds = [for (final i in e['recIds'] as List) i as int];
+      for (var i = 0; i < txIds.length; i += 500) {
+        final chunk = txIds.sublist(i, i + 500 > txIds.length ? txIds.length : i + 500);
+        await (db.update(db.transactions)..where((t) => t.id.isIn(chunk) & t.accountId.equals(into)))
+            .write(TransactionsCompanion(accountId: Value(fromId)));
+      }
+      await (db.update(db.recurrings)..where((r) => r.id.isIn(recIds) & r.accountId.equals(into)))
+          .write(RecurringsCompanion(accountId: Value(fromId)));
+
+      // Give back the opening / typed-in balance, unless the user changed them since.
+      final dst = await (db.select(db.accounts)..where((a) => a.id.equals(into))).getSingle();
+      final before = e['before'] as Map, after = e['after'] as Map;
+      if (dst.openingBalance == after['opening']) {
+        await (db.update(db.accounts)..where((a) => a.id.equals(into))).write(AccountsCompanion(openingBalance: Value(before['opening'] as int)));
+      }
+      if (dst.balanceSet == after['set'] && dst.balanceSetAt?.millisecondsSinceEpoch == after['setAt']) {
+        await (db.update(db.accounts)..where((a) => a.id.equals(into)))
+            .write(AccountsCompanion(balanceSet: Value(before['set'] as int?), balanceSetAt: Value(ms(before['setAt']))));
+      }
+
+      // Numbers of everything inside the restored account point back at it.
+      final aliases = await db.accountAliases();
+      if (f['number'] != null) aliases.remove(f['number']);
+      void inner(List<Map<String, dynamic>> es) {
+        for (final c in es) {
+          final n = (c['from'] as Map)['number'] as String?;
+          if (n != null) aliases[n] = fromId;
+          inner([for (final x in c['children'] as List) Map<String, dynamic>.from(x as Map)]);
+        }
+      }
+      inner(children);
+      await db.setAccountAliases(aliases);
+      await _recomputeGaps(into);
+      await _recomputeGaps(fromId);
     });
   }
 
