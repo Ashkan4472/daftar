@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -276,6 +278,16 @@ class AppDb extends _$AppDb {
           await customStatement('PRAGMA busy_timeout = 8000');
         },
       );
+
+  /// SMS numbers of accounts that were merged into another one: number -> surviving account id.
+  Future<Map<String, int>> accountAliases() async {
+    final row = await (select(settings)..where((s) => s.key.equals('account_aliases'))).getSingleOrNull();
+    if (row == null) return {};
+    return {for (final e in (jsonDecode(row.value) as Map<String, dynamic>).entries) e.key: e.value as int};
+  }
+
+  Future<void> setAccountAliases(Map<String, int> m) => into(settings)
+      .insertOnConflictUpdate(SettingsCompanion.insert(key: 'account_aliases', value: jsonEncode(m)));
 
   /// Full-text index over note + raw SMS body, kept in sync by triggers.
   // ponytail: stores a second copy of each SMS body; make it contentless if size matters.

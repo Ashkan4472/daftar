@@ -1313,6 +1313,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get accountNumberTaken => 'حساب دیگری این شماره را دارد';
 
   @override
+  String get mergeAccount => 'ادغام حساب';
+
+  @override
+  String get mergeAccountWarn =>
+      'همهٔ تراکنش‌ها به حساب انتخابی منتقل می‌شوند و این حساب حذف می‌شود. پیامک‌های جدید با شمارهٔ آن هم به حساب انتخابی می‌روند و موجودی از آخرین پیامک پیروی می‌کند. این کار قابل بازگشت نیست.';
+
+  @override
   String get archiveAccount => 'بایگانی حساب';
 
   @override

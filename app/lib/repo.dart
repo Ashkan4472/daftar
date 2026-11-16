@@ -396,6 +396,42 @@ class Repo {
       (db.update(db.accounts)..where((a) => a.id.equals(accountId)))
           .write(AccountsCompanion(balanceSet: Value(value), balanceSetAt: Value(value == null ? null : at)));
 
+  /// Folds account [from] into [into]: its transactions and recurring items move over, its SMS
+  /// number keeps routing new messages to [into], and [from] is deleted. Balances are then
+  /// anchored on the newest SMS balance of either account, so the dashboard matches the bank.
+  Future<void> mergeAccounts({required int from, required int into}) async {
+    if (from == into) return;
+    await db.transaction(() async {
+      final src = await (db.select(db.accounts)..where((a) => a.id.equals(from))).getSingle();
+      final dst = await (db.select(db.accounts)..where((a) => a.id.equals(into))).getSingle();
+      await (db.update(db.transactions)..where((t) => t.accountId.equals(from))).write(TransactionsCompanion(accountId: Value(into)));
+      await (db.update(db.recurrings)..where((r) => r.accountId.equals(from))).write(RecurringsCompanion(accountId: Value(into)));
+      final aliases = await db.accountAliases();
+      for (final e in aliases.entries.toList()) {
+        if (e.value == from) aliases[e.key] = into;
+      }
+      if (src.number != null) aliases[src.number!] = into;
+      await db.setAccountAliases(aliases);
+      await (db.update(db.accounts)..where((a) => a.id.equals(into))).write(AccountsCompanion(
+        openingBalance: dst.openingBalance == 0 ? Value(src.openingBalance) : const Value.absent(),
+        bankId: dst.bankId == null ? Value(src.bankId) : const Value.absent(),
+        number: dst.number == null ? Value(src.number) : const Value.absent(),
+        balanceSet: dst.balanceSet == null ? Value(src.balanceSet) : const Value.absent(),
+        balanceSetAt: dst.balanceSet == null ? Value(src.balanceSetAt) : const Value.absent(),
+      ));
+      await (db.delete(db.accounts)..where((a) => a.id.equals(from))).go();
+      await db.customStatement('''
+        WITH o AS (
+          SELECT id, balance_after - (LAG(balance_after) OVER w + amount) AS gap
+          FROM transactions
+          WHERE account_id = ?1 AND deleted_at IS NULL AND balance_after IS NOT NULL
+          WINDOW w AS (ORDER BY occurred_at, id)
+        )
+        UPDATE transactions SET balance_gap = o.gap FROM o WHERE o.id = transactions.id
+      ''', [into]);
+    });
+  }
+
   Future<void> archiveAccount(int id, bool v) =>
       (db.update(db.accounts)..where((a) => a.id.equals(id))).write(AccountsCompanion(archived: Value(v)));
 

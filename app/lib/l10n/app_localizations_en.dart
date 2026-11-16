@@ -1310,6 +1310,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountNumberTaken => 'Another account already uses this number';
 
   @override
+  String get mergeAccount => 'Merge account';
+
+  @override
+  String get mergeAccountWarn =>
+      'All transactions move to the chosen account and this one is removed. New messages with its number go to the chosen account too, so the balance follows the latest SMS. This cannot be undone.';
+
+  @override
   String get archiveAccount => 'Archive account';
 
   @override

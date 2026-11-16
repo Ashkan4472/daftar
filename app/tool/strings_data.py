@@ -421,6 +421,8 @@ S.update({
   'accountNumber': ('Account or card number', 'شمارهٔ حساب یا کارت'),
   'accountNumberHint': ('Exactly as it appears in the bank SMS, so new messages land here.', 'دقیقاً مثل پیامک بانک، تا پیامک‌های جدید به همین حساب بروند.'),
   'accountNumberTaken': ('Another account already uses this number', 'حساب دیگری این شماره را دارد'),
+  'mergeAccount': ('Merge account', 'ادغام حساب'),
+  'mergeAccountWarn': ('All transactions move to the chosen account and this one is removed. New messages with its number go to the chosen account too, so the balance follows the latest SMS. This cannot be undone.', 'همهٔ تراکنش‌ها به حساب انتخابی منتقل می‌شوند و این حساب حذف می‌شود. پیامک‌های جدید با شمارهٔ آن هم به حساب انتخابی می‌روند و موجودی از آخرین پیامک پیروی می‌کند. این کار قابل بازگشت نیست.'),
   'archiveAccount': ('Archive account', 'بایگانی حساب'),
   'archivedAccounts': ('Archived accounts', 'حساب‌های بایگانی‌شده'),
   'typeTransfer': ('Transfer', 'انتقال'),

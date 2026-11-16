@@ -2444,6 +2444,18 @@ abstract class AppLocalizations {
   /// **'Another account already uses this number'**
   String get accountNumberTaken;
 
+  /// No description provided for @mergeAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge account'**
+  String get mergeAccount;
+
+  /// No description provided for @mergeAccountWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'All transactions move to the chosen account and this one is removed. New messages with its number go to the chosen account too, so the balance follows the latest SMS. This cannot be undone.'**
+  String get mergeAccountWarn;
+
   /// No description provided for @archiveAccount.
   ///
   /// In en, this message translates to:

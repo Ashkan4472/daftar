@@ -66,4 +66,18 @@ void main() {
     b = await balance();
     expect(b.source, BalanceSource.sms);
   });
+
+  test('merging accounts anchors on the newest SMS balance of either', () async {
+    final two = await db.into(db.accounts).insert(AccountsCompanion.insert(
+        name: 'Card', kind: AccountKind.bank, icon: 'bank:regular', color: 0, number: const Value('6037')));
+    await tx(-100, t0, balanceAfter: 5000);
+    await db.into(db.transactions).insert(TransactionsCompanion.insert(
+        accountId: two, amount: -200, occurredAt: t0.add(const Duration(hours: 1)), jalaliYm: 140508,
+        kind: TxKind.expense, source: TxSource.sms, balanceAfter: const Value(4800)));
+    await Repo(db).mergeAccounts(from: two, into: 1);
+    final b = await balance();
+    expect(b.balance, 4800);
+    expect((await db.select(db.accounts).get()).any((a) => a.id == two), isFalse);
+    expect((await db.accountAliases())['6037'], 1);
+  });
 }

@@ -166,6 +166,8 @@ class SmsImporter {
     final found = await (db.select(db.accounts)..where((a) => a.number.equals(number)))
         .getSingleOrNull();
     if (found != null) return found.id;
+    final alias = (await db.accountAliases())[number];
+    if (alias != null && await (db.select(db.accounts)..where((a) => a.id.equals(alias))).getSingleOrNull() != null) return alias;
     final bank = bankId == null
         ? null
         : await (db.select(db.banks)..where((b) => b.id.equals(bankId))).getSingle();

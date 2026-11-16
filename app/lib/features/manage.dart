@@ -448,6 +448,15 @@ Future<void> editAccount(BuildContext context, WidgetRef ref, [Account? a]) {
           : [
               const SizedBox(height: 8),
               OutlinedButton.icon(
+                icon: Icon(appIcon('arrows-merge')),
+                label: Text(l.mergeAccount),
+                onPressed: () async {
+                  final nav = Navigator.of(context);
+                  if (await _mergeAccountDialog(context, ref, a)) nav.pop();
+                },
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
                 icon: Icon(appIcon('archive')),
                 label: Text(l.archiveAccount),
                 onPressed: () async {
@@ -459,6 +468,38 @@ Future<void> editAccount(BuildContext context, WidgetRef ref, [Account? a]) {
             ],
     ),
   );
+}
+
+/// Asks which account [a] should be folded into, confirms, and merges. True when merged.
+Future<bool> _mergeAccountDialog(BuildContext context, WidgetRef ref, Account a) async {
+  final l = AppLocalizations.of(context);
+  final others = (ref.read(accountsProvider).value ?? const <Account>[]).where((x) => x.id != a.id && !x.archived).toList();
+  if (others.isEmpty) return false;
+  final target = await showDialog<Account>(
+    context: context,
+    builder: (ctx) => SimpleDialog(
+      title: Text(l.mergeInto),
+      children: [
+        for (final o in others)
+          SimpleDialogOption(onPressed: () => Navigator.pop(ctx, o), child: Row(children: [IconAvatar(o.icon, o.color, size: 32), const SizedBox(width: 12), Expanded(child: Text(o.name))])),
+      ],
+    ),
+  );
+  if (target == null || !context.mounted) return false;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text('${a.name} → ${target.name}'),
+      content: Text(l.mergeAccountWarn),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancel)),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.merge)),
+      ],
+    ),
+  );
+  if (ok != true) return false;
+  await ref.read(repoProvider).mergeAccounts(from: a.id, into: target.id);
+  return true;
 }
 
 class AccountsScreen extends ConsumerWidget {
