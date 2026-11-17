@@ -428,7 +428,7 @@ class Repo {
         'setAt': (useSrcSet ? src.balanceSetAt : dst.balanceSetAt)?.millisecondsSinceEpoch,
       };
       await (db.update(db.accounts)..where((a) => a.id.equals(into))).write(AccountsCompanion(
-        openingBalance: Value(after['opening']! as int),
+        openingBalance: Value(dst.openingBalance + src.openingBalance),
         balanceSet: Value(useSrcSet ? src.balanceSet : dst.balanceSet),
         balanceSetAt: Value(useSrcSet ? src.balanceSetAt : dst.balanceSetAt),
       ));

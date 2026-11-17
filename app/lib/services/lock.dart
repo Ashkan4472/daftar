@@ -45,10 +45,31 @@ Future<bool> biometricsAvailable() async {
   }
 }
 
-Future<bool> biometricUnlock(String reason) async {
+enum BioResult {
+  ok,
+
+  /// The person dismissed the prompt or it did not match: leave them on the PIN pad.
+  declined,
+
+  /// The system cancelled or could not show the prompt (app not yet in front, another prompt
+  /// running, sensor busy). Worth asking again shortly.
+  interrupted,
+}
+
+Future<BioResult> biometricUnlock(String reason) async {
   try {
-    return await _auth.authenticate(localizedReason: reason, biometricOnly: true);
+    return await _auth.authenticate(localizedReason: reason, biometricOnly: true) ? BioResult.ok : BioResult.declined;
+  } on LocalAuthException catch (e) {
+    return switch (e.code) {
+      LocalAuthExceptionCode.systemCanceled ||
+      LocalAuthExceptionCode.uiUnavailable ||
+      LocalAuthExceptionCode.authInProgress ||
+      LocalAuthExceptionCode.timeout ||
+      LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable =>
+        BioResult.interrupted,
+      _ => BioResult.declined,
+    };
   } catch (_) {
-    return false;
+    return BioResult.interrupted;
   }
 }

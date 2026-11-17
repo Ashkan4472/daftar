@@ -21,6 +21,8 @@ void main() {
     });
 
     const n = int.fromEnvironment('PERF_N', defaultValue: 1000000);
+    // Limits are for the developer's computer; pass --dart-define=PERF_SCALE=2 on a slower one (CI, containers).
+    const scale = int.fromEnvironment('PERF_SCALE', defaultValue: 1);
     final sw = Stopwatch()..start();
     await db.customStatement('DROP TRIGGER tx_fts_ai');
     await db.customStatement('''
@@ -63,8 +65,8 @@ void main() {
       await run();
       final ms = t.elapsedMilliseconds;
       // ignore: avoid_print
-      print('${name.padRight(26)} $ms ms (limit $maxMs)');
-      expect(ms, lessThan(maxMs), reason: name);
+      print('${name.padRight(26)} $ms ms (limit ${maxMs * scale})');
+      expect(ms, lessThan(maxMs * scale), reason: name);
       return ms;
     }
 

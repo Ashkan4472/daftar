@@ -148,6 +148,8 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
   final _pad = GlobalKey<PinPadState>();
   bool _bioTried = false;
   bool _bioBusy = false;
+  bool _bioAgain = false; // the app came back while a prompt was open: ask once more when it ends
+  int _bioRetries = 0;
 
   @override
   void initState() {
@@ -166,15 +168,24 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) _leftAt = DateTime.now();
+    // The fingerprint dialog itself can pause the app on some phones; that is not leaving it.
+    if (state == AppLifecycleState.paused && !_bioBusy) _leftAt = DateTime.now();
     // The prompt is cancelled when the app pauses (e.g. while a notification launch settles); ask again once visible.
-    if (state == AppLifecycleState.resumed && _locked && _decided && _s['lock_bio'] == 'true') _bio();
-    if (state == AppLifecycleState.resumed && _enabled && _leftAt != null) {
+    if (state == AppLifecycleState.resumed && _locked && _decided && _s['lock_bio'] == 'true') {
+      if (_bioBusy) {
+        _bioAgain = true;
+      } else {
+        _bioRetries = 0;
+        _bio();
+      }
+    }
+    if (state == AppLifecycleState.resumed && _enabled && _leftAt != null && !_bioBusy) {
       final secs = int.tryParse(_s['lock_timeout'] ?? '') ?? 60;
       if (DateTime.now().difference(_leftAt!).inSeconds >= secs && !_locked) {
         setState(() {
           _locked = true;
           _bioTried = false;
+          _bioRetries = 0;
           _error = null;
         });
       }
@@ -182,13 +193,31 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
   }
 
   Future<void> _bio() async {
-    if (_bioBusy) return;
+    if (_bioBusy || !_locked) return;
     _bioBusy = true;
+    _bioAgain = false;
     final l = AppLocalizations.of(context);
+    var result = BioResult.declined;
     try {
-      if (await biometricUnlock(l.lockBioReason) && mounted) setState(() => _locked = false);
+      result = await biometricUnlock(l.lockBioReason);
+      if (result == BioResult.ok && mounted) {
+        setState(() {
+          _locked = false;
+          _leftAt = null; // pauses caused by the prompt must not count as time away
+          _fails = 0;
+          _error = null;
+        });
+      }
     } finally {
       _bioBusy = false;
+    }
+    if (!mounted || !_locked || result == BioResult.ok) return;
+    final visible = WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    // Cancelled by the system (cold start, notification launch, sensor busy): try again, a few times at most.
+    if (visible && (_bioAgain || (result == BioResult.interrupted && _bioRetries < 3))) {
+      if (result == BioResult.interrupted) _bioRetries++;
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (mounted && _locked && WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) _bio();
     }
   }
 
@@ -252,7 +281,7 @@ class _LockGateState extends ConsumerState<LockGate> with WidgetsBindingObserver
                         error: _error,
                         disabled: blocked,
                         onComplete: _check,
-                        extra: bio ? IconButton(tooltip: l.lockUseBio, onPressed: _bio, icon: Icon(appIcon('fingerprint'), size: 32)) : null,
+                        extra: bio ? IconButton(tooltip: l.lockUseBio, onPressed: () { _bioRetries = 0; _bio(); }, icon: Icon(appIcon('fingerprint'), size: 32)) : null,
                       ),
                       const SizedBox(height: 8),
                       Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: Text(l.lockForgot, textAlign: TextAlign.center, style: context.mutedStyle)),
