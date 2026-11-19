@@ -571,6 +571,34 @@ class Repo {
                 transferGroupId: Value(group)));
         }
       });
+
+  /// Turns an existing row (usually from SMS) into one leg of a transfer with [other]. Links the
+  /// opposite row already in [other] (same amount, within 3 days) if there is one, else adds that leg.
+  Future<void> markTransfer(int txId, int other) => db.transaction(() async {
+        final t = await (db.select(db.transactions)..where((x) => x.id.equals(txId))).getSingle();
+        const window = Duration(days: 3);
+        final match = await (db.select(db.transactions)
+              ..where((x) =>
+                  x.accountId.equals(other) & x.amount.equals(-t.amount) & x.deletedAt.isNull() &
+                  x.kind.equals(TxKind.transfer.name).not() &
+                  x.occurredAt.isBetweenValues(t.occurredAt.subtract(window), t.occurredAt.add(window)))
+              ..limit(1))
+            .getSingleOrNull();
+        final group = -txId; // unique, never clashes with proposal ids or addTransfer's timestamps
+        final ids = [txId, if (match != null) match.id];
+        await (db.update(db.transactions)..where((x) => x.id.isIn(ids))).write(TransactionsCompanion(
+            kind: const Value(TxKind.transfer), categoryId: const Value(null), needsReview: const Value(false),
+            transferGroupId: Value(group), updatedAt: Value(DateTime.now())));
+        await (db.delete(db.txParts)..where((x) => x.transactionId.isIn(ids))).go();
+        await (db.update(db.transferProposals)
+              ..where((p) => p.status.equals('pending') & (p.outTxId.isIn(ids) | p.inTxId.isIn(ids))))
+            .write(const TransferProposalsCompanion(status: Value('dismissed')));
+        if (match == null) {
+          await db.into(db.transactions).insert(TransactionsCompanion.insert(
+              accountId: other, amount: -t.amount, occurredAt: t.occurredAt, jalaliYm: t.jalaliYm,
+              kind: TxKind.transfer, source: TxSource.manual, note: Value(t.note), transferGroupId: Value(group)));
+        }
+      });
 }
 
 final repoProvider = Provider<Repo>((ref) => Repo(ref.watch(dbProvider)));

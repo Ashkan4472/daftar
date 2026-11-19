@@ -775,6 +775,8 @@
   "splitAccount": "Split account",
   "archiveAccount": "Archive account",
   "archivedAccounts": "Archived accounts",
+  "markAsTransfer": "Mark as transfer",
+  "markAsTransferHint": "Money moved to or from another of your accounts. Links the matching row there, or adds it.",
   "typeTransfer": "Transfer",
   "transferFrom": "From account",
   "transferTo": "To account",

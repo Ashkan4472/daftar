@@ -1329,6 +1329,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get archivedAccounts => 'حساب‌های بایگانی‌شده';
 
   @override
+  String get markAsTransfer => 'علامت‌گذاری به‌عنوان انتقال';
+
+  @override
+  String get markAsTransferHint =>
+      'پول به یا از یکی دیگر از حساب‌هایتان رفته است. تراکنش متناظر در آن حساب پیوند می‌خورد یا ساخته می‌شود.';
+
+  @override
   String get typeTransfer => 'انتقال';
 
   @override

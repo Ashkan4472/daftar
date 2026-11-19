@@ -396,6 +396,8 @@
   "splitAccount": "جداسازی حساب",
   "archiveAccount": "بایگانی حساب",
   "archivedAccounts": "حساب‌های بایگانی‌شده",
+  "markAsTransfer": "علامت‌گذاری به‌عنوان انتقال",
+  "markAsTransferHint": "پول به یا از یکی دیگر از حساب‌هایتان رفته است. تراکنش متناظر در آن حساب پیوند می‌خورد یا ساخته می‌شود.",
   "typeTransfer": "انتقال",
   "transferFrom": "از حساب",
   "transferTo": "به حساب",

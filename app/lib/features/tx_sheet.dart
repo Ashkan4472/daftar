@@ -150,6 +150,13 @@ class TxDetailSheet extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   TxCatSplit(txId: id, amount: tx.amount),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(appIcon('arrows-left-right')),
+                    title: Text(l.markAsTransfer),
+                    subtitle: Text(l.markAsTransferHint),
+                    onTap: () => _pickTransferAccount(context, ref, tx),
+                  ),
                 ],
                 SectionHeader(l.tags),
                 TagSelector(
@@ -245,6 +252,32 @@ class TxDetailSheet extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<void> _pickTransferAccount(BuildContext context, WidgetRef ref, Transaction tx) async {
+  final l = AppLocalizations.of(context);
+  final others = (ref.read(accountsProvider).value ?? const <Account>[])
+      .where((a) => !a.archived && a.id != tx.accountId)
+      .toList();
+  final picked = await showModalBottomSheet<int>(
+    context: context,
+    useSafeArea: true,
+    builder: (ctx) => ListView(
+      shrinkWrap: true,
+      padding: const EdgeInsets.only(bottom: 16),
+      children: [
+        ListTile(title: Text(tx.amount < 0 ? l.transferTo : l.transferFrom, style: Theme.of(ctx).textTheme.titleMedium)),
+        if (others.isEmpty) ListTile(title: Text(l.transferPick)),
+        for (final a in others)
+          ListTile(
+            leading: Icon(appIcon(a.icon), color: Color(a.color)),
+            title: Text(a.name),
+            onTap: () => Navigator.pop(ctx, a.id),
+          ),
+      ],
+    ),
+  );
+  if (picked != null) await ref.read(repoProvider).markTransfer(tx.id, picked);
 }
 
 class _Banner extends StatelessWidget {

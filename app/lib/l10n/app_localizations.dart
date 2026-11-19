@@ -2474,6 +2474,18 @@ abstract class AppLocalizations {
   /// **'Archived accounts'**
   String get archivedAccounts;
 
+  /// No description provided for @markAsTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as transfer'**
+  String get markAsTransfer;
+
+  /// No description provided for @markAsTransferHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Money moved to or from another of your accounts. Links the matching row there, or adds it.'**
+  String get markAsTransferHint;
+
   /// No description provided for @typeTransfer.
   ///
   /// In en, this message translates to:

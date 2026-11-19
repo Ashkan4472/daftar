@@ -119,4 +119,31 @@ void main() {
     await repo.splitAccount(c);
     expect(await db.accountAliases(), isEmpty);
   });
+
+  test('markTransfer links the matching row, or adds the missing leg', () async {
+    final cash = await db.into(db.accounts).insert(AccountsCompanion.insert(name: 'Cash', kind: AccountKind.cash, icon: 'x', color: 0));
+    final repo = Repo(db);
+    Future<List<Transaction>> all() => (db.select(db.transactions)..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+
+    // No counterpart: a cash leg is added.
+    await tx(-500, t0);
+    await repo.markTransfer((await all()).last.id, cash);
+    var rows = await all();
+    expect(rows.length, 2);
+    expect(rows.map((r) => r.kind).toSet(), {TxKind.transfer});
+    expect(rows[1].accountId, cash);
+    expect(rows[1].amount, 500);
+    expect(rows[0].transferGroupId, rows[1].transferGroupId);
+
+    // Counterpart exists a day later: linked, nothing added.
+    await tx(-200, t0);
+    await db.into(db.transactions).insert(TransactionsCompanion.insert(accountId: cash, amount: 200,
+        occurredAt: t0.add(const Duration(days: 1)), jalaliYm: 140508, kind: TxKind.income, source: TxSource.manual));
+    rows = await all();
+    await repo.markTransfer(rows[2].id, cash);
+    rows = await all();
+    expect(rows.length, 4);
+    expect(rows[3].kind, TxKind.transfer);
+    expect(rows[2].transferGroupId, rows[3].transferGroupId);
+  });
 }

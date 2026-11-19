@@ -1326,6 +1326,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get archivedAccounts => 'Archived accounts';
 
   @override
+  String get markAsTransfer => 'Mark as transfer';
+
+  @override
+  String get markAsTransferHint =>
+      'Money moved to or from another of your accounts. Links the matching row there, or adds it.';
+
+  @override
   String get typeTransfer => 'Transfer';
 
   @override
